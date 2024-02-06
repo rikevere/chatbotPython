@@ -9,11 +9,11 @@ load_dotenv()
 
 cliente = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 modelo = "gpt-4"
-#importar o Flask em seu código e criar uma instância da classe Flask:
+
 app = Flask(__name__)
 app.secret_key = 'alura'
 
-contexto = carrega("dados/ecomart.txt")
+contexto = carrega("chatbotPython\dados\ecomart.txt") 
 
 def bot(prompt):
     maximo_tentativas = 1
@@ -22,7 +22,7 @@ def bot(prompt):
     while True:
         try:
             prompt_do_sistema = f"""
-            Você é um chatbot de atendimento a clientes de um e-commerce.
+            Você é um chatbot de atendimento a clientes de um e-commerce. 
             Você não deve responder perguntas que não sejam dados do ecommerce informado!
             Você deve gerar respostas utilizando o contexto abaixo.
             
@@ -41,7 +41,7 @@ def bot(prompt):
                         }
                 ],
                 temperature=1,
-                max_tokens=512,
+                max_tokens=300,
                 top_p=1,
                 frequency_penalty=0,
                 presence_penalty=0,
@@ -53,17 +53,13 @@ def bot(prompt):
                         return "Erro no GPT: %s" % erro
                 print('Erro de comunicação com OpenAI:', erro)
                 sleep(1)
-
-
+            
 @app.route("/chat", methods=["POST"])
 def chat():
     prompt = request.json["msg"]
     resposta = bot(prompt)
     texto_resposta = resposta.choices[0].message.content
     return texto_resposta
-
-
-
 
 @app.route("/")
 def home():
