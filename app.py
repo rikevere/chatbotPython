@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 import os
 from time import sleep
 from helpers import *
+from selecionar_persona import *
+from selecionar_documentos import *
 
 load_dotenv()
 
@@ -13,11 +15,17 @@ modelo = "gpt-4"
 app = Flask(__name__)
 app.secret_key = 'alura'
 
-contexto = carrega("chatbotPython\dados\ecomart.txt") 
+#contexto = carrega("chatbotPython\dados\ecomart.txt") 
 
 def bot(prompt):
     maximo_tentativas = 1
     repeticao = 0
+    #personas, refere-se a uma coleção/dicionário presente em "selecionar_persona"
+    #permite que através de um índice, seja retornado um valor de texto ou numérico.
+    #no exemplo a seguir, através do dado da variável "prompt", é retornado o índice para a coleção e seu respectivo valor
+    personalidade = personas[selecionar_persona(prompt)]
+    contexto = selecionar_contexto(prompt)
+    documento_selecionado = selecionar_documento(contexto)
 
     while True:
         try:
@@ -25,9 +33,13 @@ def bot(prompt):
             Você é um chatbot de atendimento a clientes de um e-commerce. 
             Você não deve responder perguntas que não sejam dados do ecommerce informado!
             Você deve gerar respostas utilizando o contexto abaixo.
+            Você deve adotar a persona abaixo.
             
             # Contexto
-            {contexto}
+            {documento_selecionado}
+
+            # Persona
+            {personalidade} 
             """
             response = cliente.chat.completions.create(
                 messages=[
