@@ -15,8 +15,10 @@ modelo = "gpt-4"
 app = Flask(__name__)
 app.secret_key = 'alura'
 
-assistente = criar_assistente()
-thread = criar_thread()
+assistente = pegar_json()
+thread_id = assistente["thread_id"]
+assistente_id = assistente["assistant_id"]
+file_ids = assistente["file_ids"]
 
 def bot(prompt):
     maximo_tentativas = 1
@@ -24,23 +26,23 @@ def bot(prompt):
     while True:
         try:
             cliente.beta.threads.messages.create(
-            thread_id=thread.id,
+            thread_id=thread_id,
             role = "user",
             content =  prompt
             )
 
             run = cliente.beta.threads.runs.create(
-                    thread_id=thread.id,
-                    assistant_id=assistente.id
+                    thread_id=thread_id,
+                    assistant_id=assistente_id
                 )
             
             while run.status !="completed":
                 run = cliente.beta.threads.runs.retrieve(
-                    thread_id=thread.id,
+                    thread_id=thread_id,
                     run_id=run.id
                 )
 
-            historico = list(cliente.beta.threads.messages.list(thread_id=thread.id).data)
+            historico = list(cliente.beta.threads.messages.list(thread_id=thread_id).data)
             resposta = historico[0]
             return resposta    
             
@@ -66,8 +68,8 @@ def home():
 @app.route('/logoff', methods=['POST'])
 def logoff():
     # Aqui você pode adicionar a lógica para tratar o logoff, como atualizar o status do usuário no banco de dados
-    cliente.beta.assistants.delete(assistant_id=assistente.id)
-    cliente.beta.threads.delete(thread_id=thread.id)
+    cliente.beta.assistants.delete(assistant_id=assistente_id)
+    cliente.beta.threads.delete(thread_id=thread_id)
     print("Usuário saiu")
     return '', 204  # Retorna uma resposta sem conteúdo
 
