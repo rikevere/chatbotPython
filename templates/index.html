@@ -35,4 +35,10 @@
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+<!-- Detectar quando um usuário fecha uma página do navegador
+<script>
+    window.addEventListener("beforeunload", function(event) {
+        navigator.sendBeacon("/logoff", "user left");
+    });
+</script> -->
 </html>
