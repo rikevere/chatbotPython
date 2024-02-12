@@ -12,19 +12,19 @@ def criar_lista_ids():
         lista_ids_arquivos = []
 
         file_dados = cliente.files.create(
-                file=open("dados/dados_ecomart.txt", "rb"),
+                file=open("D:/Python/Codigos/chatbotPython/dados/dados_ecomart.txt", "rb"),
                 purpose="assistants"
         )
         lista_ids_arquivos.append(file_dados.id)
 
         file_politicas = cliente.files.create(
-                file=open("dados/políticas_ecomart.txt", "rb"),
+                file=open("D:/Python/Codigos/chatbotPython/dados/politicas_ecomart.txt", "rb"),
                 purpose="assistants"
         )
         lista_ids_arquivos.append(file_politicas.id)
 
         file_produtos = cliente.files.create(
-                file=open("dados/produtos_ecomart.txt","rb"),
+                file=open("D:/Python/Codigos/chatbotPython/dados/produtos_ecomart.txt","rb"),
                 purpose="assistants"
         )
 
