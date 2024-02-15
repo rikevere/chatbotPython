@@ -5,7 +5,7 @@ import os
 from time import sleep
 from helpers import *
 from selecionar_persona import *
-from assistente_ecomart import *
+from assistente_limalimao import *
 
 load_dotenv()
 
@@ -73,13 +73,13 @@ def bot(prompt):
                     for uma_tool in tools_acionadas:
                         nome_funcao = uma_tool.function.name
                         print(f"Selecionando Função: {nome_funcao}")
-                        #baseado no dicionario presente em "tool_scomart", retorna o nome da função em Python que dever ser utilizada
+                        #baseado no dicionario presente em "tool_limalimao", retorna o nome da função em Python que dever ser utilizada
                         #com base na função que a OpemAI selecionou no mesmo arquivo
                         #a variável "função_escolhida" passa a ser a própria função
                         funcao_escolhida = minhas_funcoes[nome_funcao]
                         argumentos = json.loads(uma_tool.function.arguments)
                         print(f"Selecionando Argumentos: {argumentos}")
-                        #neste ponto e para este exemplo, "funcao_escolhida" é igual a "validar_codigo_promocional(), do arquivo tools e receberá os arquimentos"
+                        #neste ponto e para este exemplo, "funcao_escolhida" é igual a "validar_codigo_promocional(), do arquivo tools e receberá os argumentos"
                         #o retono é armazenado em "resposta_funcao"
                         resposta_funcao = funcao_escolhida(argumentos)
                         print(f"Retorno da função: {nome_funcao} para o GPT: {resposta_funcao}")
@@ -112,6 +112,7 @@ def chat():
     print(prompt)
     resposta = bot(prompt)
     texto_resposta = resposta.content[0].text.value
+    print(texto_resposta)
     return texto_resposta
 
 @app.route("/")
@@ -128,6 +129,4 @@ def logoff():
     return '', 204  # Retorna uma resposta sem conteúdo
 
 if __name__ == "__main__":
-    app.run()
-
-#debug = True
+    app.run(debug = True)

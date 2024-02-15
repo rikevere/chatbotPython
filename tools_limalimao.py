@@ -4,13 +4,20 @@ from dotenv import load_dotenv
 import os
 from time import sleep
 from helpers import *
-from selecionar_documentos import *
-from selecionar_persona import *
+#from selecionar_documentos import *
+#from selecionar_persona import *
+from retorna_previsao_meteoblue import *
 
 load_dotenv()
 
 cliente = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 modelo = "gpt-4-1106-preview"
+
+# Substitua 'SUA_CHAVE_API' pela sua chave API real do Meteoblue
+API_KEY = os.getenv("METEOBLUE_API_KEY")
+# Valores de latitude e longitude da localização da cidade de Verê
+LATITUDE = os.getenv("LATITUDE_VERE")
+LONGITUDE = os.getenv("LONGITUDE_VERE")
 
 #varíável global para acessar todas as ferramentas.
 minhas_tools = [
@@ -21,7 +28,7 @@ minhas_tools = [
     #São funções criadas para garantir que quando o usuário questionar a AI sobre determinado assunto, 
     #ele não faça a composição da resposta com base apenas no próprio conhecimento, mas sim, 
     #utilize uma funcionalidade de Python que foge desse processo convencional para poder fazer a composição dessa resposta
-    {
+        {
             "type": "function",
                         "function": {
                         #Qualquer nome que respeite as características da criação de um método, porque vamos criar um método dentro de Python com o mesmo nome    
@@ -47,6 +54,27 @@ minhas_tools = [
                                 #A propriedade chamada de required, definirá quais são os atributos que são 
                                 #requisitos para que essa função possa ser disparada. São os dois atributos que acabamos de criar, codigo e validade
                                 "required": ["codigo", "validade"],
+                        }
+                }
+        },
+        {
+            "type": "function",
+                        "function": {
+                        "name": "retornar_previsao_cidadevere",
+                        "description": "Busque a previsão do tempo para a cidade de informada",
+                        "parameters": {
+                                "type": "object",
+                                "properties": {
+                                        "previsao": {
+                                                "type": "string",
+                                                "description": "Solicitação de previsão do tempo"
+                                        },
+                                        "cidade": {
+                                                "type": "string",
+                                                "description": "Cidade para onde deseja-se obter a previsão",
+                                        },
+                                },
+                                "required": ["previsao", "cidade"],
                         }
                 }
         }
@@ -75,6 +103,7 @@ minhas_tools = [
 def validar_codigo_promocional(argumentos):
     codigo = argumentos.get("codigo")
     validade = argumentos.get("validade")
+    print(f"Argumentos dentro da função Validar Código: {codigo} e {validade}")
 
     return f"""
         
@@ -84,7 +113,30 @@ def validar_codigo_promocional(argumentos):
         Ainda, diga se é válido ou não para o usuário.
 
         """
+
+def retornar_previsao_cidadevere(argumentos):
+        previsao = argumentos.get("previsao")
+        cidade = argumentos.get("cidade")
+        print(f"Argumentos dentro da função Previsão: {previsao} e {cidade}")
+        if cidade=='Verê':
+                print("Entrou no IF")
+                clima = obter_previsao_tempo(API_KEY, LATITUDE, LONGITUDE)
+                print(f"Dados de Clima dentro da Função do GPT: {clima}")
+                return f"""
+                
+                # Formato de Resposta
+
+                Resumo da previsão para a semana com base nestes dados: {clima}. 
+                Ainda, descorra sobre as recomendações de roupas fitness e cuidados com a saúde e o corpo com base na previsão do tempo para a semana.
+                Se algum dia da semana tiver probabilidade maior do que 30% de chuva, recomende roupas fitness para este tipo de ambiente, com atenção ao dia em que vai ocorrer.
+                Sugira no mínimo 3  atividades físicas ao ar livre, de acordo com o clima para cada dia da semana.
+                              
+                """
+        else:
+               "Desculpe, mas não tenho informações para esta cidade"         
+
 # dicionário global que será responsável por garantir que tenhamos todas as funcionalidades que associamos até esse momento
 minhas_funcoes = {
     "validar_codigo_promocional": validar_codigo_promocional,
+    "retornar_previsao_cidadevere": retornar_previsao_cidadevere,
 }
