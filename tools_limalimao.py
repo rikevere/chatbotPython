@@ -4,8 +4,6 @@ from dotenv import load_dotenv
 import os
 from time import sleep
 from helpers import *
-#from selecionar_documentos import *
-#from selecionar_persona import *
 from retorna_previsao_meteoblue import *
 
 load_dotenv()
@@ -103,7 +101,6 @@ minhas_tools = [
 def validar_codigo_promocional(argumentos):
     codigo = argumentos.get("codigo")
     validade = argumentos.get("validade")
-    print(f"Argumentos dentro da função Validar Código: {codigo} e {validade}")
 
     return f"""
         
@@ -117,11 +114,8 @@ def validar_codigo_promocional(argumentos):
 def retornar_previsao_cidadevere(argumentos):
         previsao = argumentos.get("previsao")
         cidade = argumentos.get("cidade")
-        print(f"Argumentos dentro da função Previsão: {previsao} e {cidade}")
         if cidade=='Verê':
-                print("Entrou no IF")
                 clima = obter_previsao_tempo(API_KEY, LATITUDE, LONGITUDE)
-                print(f"Dados de Clima dentro da Função do GPT: {clima}")
                 return f"""
                 
                 # Formato de Resposta

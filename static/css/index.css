@@ -6,7 +6,7 @@ body {
     flex-direction: column;
     justify-content: space-between;
     height: 100vh;
-    background: linear-gradient(to bottom, #01080E, #144480);
+    background: linear-gradient(to bottom, #06470c, #50fc67);
     color: #FFFFFF;
     font-family: 'Inter', sans-serif;
 }
@@ -26,7 +26,7 @@ body {
     justify-content: space-between;
     align-items: center;
     height: 5rem;
-    border-bottom: 1px solid #1C5296;
+    border-bottom: 1px solid #50fc67;
 }
 
 .cabecalho__acoes {
@@ -78,7 +78,7 @@ body {
 }
 
 .chat__bolha--bot {
-    background-color: #5385C3;
+    background-color: #379744;
 }
 
 .chat__bolha--bot::after {
@@ -98,7 +98,7 @@ body {
 }
 
 .chat__bolha--usuario {
-    border: 1px solid #5385C3;
+    border: 1px solid #379744;
     align-self: flex-end;
 }
 
@@ -125,7 +125,7 @@ body {
     gap: 1.5rem;
     justify-content: stretch;
     align-items: center;
-    border-top: 1px solid #1C5296;
+    border-top: 1px solid #50fc67;
 }
 
 .entrada__container {
@@ -136,8 +136,8 @@ body {
 
     padding: 0 0.5rem;
 
-    background-color: #1C5296;
-    border: 1px solid #0C305C;
+    background-color: #379744;
+    border: 1px solid #06470c;
     border-radius: 4rem;
 }
 
@@ -163,8 +163,8 @@ body {
     height: 4rem;
     width: 4rem;
 
-    background-color: #1C5296;
-    border: 1px solid #0C305C;
+    background-color: #53c362;
+    border: 1px solid #0c5c10;
     border-radius: 50%;
 }
 

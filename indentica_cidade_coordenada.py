@@ -16,5 +16,5 @@ def encontrar_cidade(latitude, longitude):
     else:
         return "Não foi possível encontrar a cidade."
 
-cidade, rua, estado, pais = encontrar_cidade(-25.88001, -52.90846)
+#cidade, rua, estado, pais = encontrar_cidade(-25.88001, -52.90846)
 #print(f"A cidade correspondente às coordenadas é: {cidade} - {rua}, estado do {estado} - {pais}")
