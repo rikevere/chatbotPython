@@ -95,7 +95,7 @@ minhas_tools = [
                                                 "description": "Informa o tipo de relatório solicitado",
                                         },
                                 },
-                                "required": ["período", "relatório"],
+                                "required": ["periodo", "relatorio"],
                         }
                 }
         }
@@ -152,7 +152,7 @@ def retornar_previsao_cidadevere(argumentos):
                                 
                 """        
         
-def retorna_vendas_clientes_periodo(argumentos):
+def retorna_relatorios_periodo(argumentos):
         periodo = argumentos.get("periodo")
         relatorio = argumentos.get("relatorio")
         print(f"Perído com origem no Chat: {periodo}")
@@ -177,30 +177,39 @@ def retorna_vendas_clientes_periodo(argumentos):
                                         
                         """ 
         elif relatorio.lower() == 'contas a pagar':
-              return f"""
+                dtini, dtfim = obter_intervalo_data(periodo, data_referencia)
+                dados_relatorio = retorna_dados_contas_a_pagar(dtini, dtfim)
+                return f"""
                         
                         # Formato de Resposta
 
-                        Você é um especialista em BI e ciência de dados que atua na controladoria da empresa. 
-                        Baseado nos dados de vendas a seguir, emita um parecer apresentando insigts ao CEO da empresa relativo aos dados apresentados
-                        Ainda, apresente o período com maior faturamento e uma lista com os 5 clientes com maior volume de compra
+                        Você é um gerente financeiro de alta eficácia e previbilidade na gestão do contas a pagar da empresa. 
+                        Baseado nos dados de contas a pagar a seguir, emita um parecer apresentando insigts ao CEO da empresa 
+                        relativo aos dados apresentados e qual a melhor estratégia para a manutenção da saúde financeira da empresa
+                        Apresente dados sobre o maior agrupamento de despesas e pontos de atenção a vencimentos e definição de datas estratégicas para pagamentos
+                        Se tiver acesso aos dados das vendas, emita estratégias de cruzamento de informações que beneficiem o pagamento dos compromissos com fornecedores
                         Apresente outras informações relevantes sobre os dados apresentados.
 
-                        Estes são dos dados das vendas:
+                        Estes são dos dados do contas a pagar:
                         {dados_relatorio}
                                         
                         """  
         elif relatorio.lower() == 'contas a receber':
+               dtini, dtfim = obter_intervalo_data(periodo, data_referencia)
+               dados_relatorio = retorna_dados_contas_a_receber(dtini, dtfim)
                return f"""
                         
                         # Formato de Resposta
 
-                        Você é um especialista em BI e ciência de dados que atua na controladoria da empresa. 
-                        Baseado nos dados de vendas a seguir, emita um parecer apresentando insigts ao CEO da empresa relativo aos dados apresentados
-                        Ainda, apresente o período com maior faturamento e uma lista com os 5 clientes com maior volume de compra
+                        Você é um gerente financeiro de alta eficácia e previbilidade na gestão do contas a receber da empresa.
+                        Baseado nos dados de contas a receber a seguir, emita um parecer apresentando insigts ao CEO da empresa 
+                        relativo aos dados apresentados e qual a melhor estratégia para a manutenção da saúde financeira da empresa. Como os juros e descontos tem influenciado.
+                        Apresente dados sobre o maior agrupamento de receitas e pontos de atenção a vencimentos e definição de datas estratégicas para os recebimentos
+                        Se tiver acesso aos dados das vendas e contas a pagar, emita estratégias de cruzamento de informações que beneficiem o pagamento dos compromissos com fornecedores,
+                        o aumento das vendas e um fluxo de caixa adequado.
                         Apresente outras informações relevantes sobre os dados apresentados.
 
-                        Estes são dos dados das vendas:
+                        Estes são dos dados do contas a receber:
                         {dados_relatorio}
                                         
                         """ 
@@ -210,5 +219,5 @@ def retorna_vendas_clientes_periodo(argumentos):
 minhas_funcoes = {
     "validar_codigo_promocional": validar_codigo_promocional,
     "retornar_previsao_cidadevere": retornar_previsao_cidadevere,
-    "retorna_vendas_clientes_período": retorna_vendas_clientes_periodo
+    "retorna_vendas_clientes_período": retorna_relatorios_periodo
 }
