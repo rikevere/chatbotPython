@@ -26,7 +26,7 @@ STATUS_COMPLETED = "completed"
 STATUS_REQUIRES_ACTION = "requires_action"
 
 caminho_imagem_enviada = None
-UPLOAD_FOLDER = 'chatbotPython/dados'
+UPLOAD_FOLDER = 'dados'
 
 def bot(prompt):
     global caminho_imagem_enviada
@@ -88,17 +88,17 @@ def bot(prompt):
                     respostas_tools_acionadas = []     
                     for uma_tool in tools_acionadas:
                         nome_funcao = uma_tool.function.name
-                        #print(f"Selecionando Função: {nome_funcao}")
+                        print(f"Selecionando Função: {nome_funcao}")
                         #baseado no dicionario presente em "tool_limalimao", retorna o nome da função em Python que dever ser utilizada
-                        #com base na função que a OpemAI selecionou no mesmo arquivo
+                        #com base na função que a OpenAI selecionou no mesmo arquivo
                         #a variável "função_escolhida" passa a ser a própria função
                         funcao_escolhida = minhas_funcoes[nome_funcao]
                         argumentos = json.loads(uma_tool.function.arguments)
-                        #print(f"Selecionando Argumentos: {argumentos}")
+                        print(f"Selecionando Argumentos: {argumentos}")
                         #neste ponto e para este exemplo, "funcao_escolhida" é igual a "validar_codigo_promocional(), do arquivo tools e receberá os argumentos"
                         #o retono é armazenado em "resposta_funcao"
                         resposta_funcao = funcao_escolhida(argumentos)
-                        #print(f"Retorno da função: {nome_funcao} para o GPT: {resposta_funcao}")
+                        print(f"Retorno da função: {nome_funcao} para o GPT: {resposta_funcao}")
                         #para tirar aquele status de ação requerida, precisamos entregar essa resposta para a function. Dentro do laço de repetição
                         respostas_tools_acionadas.append({
                                 "tool_call_id": uma_tool.id,

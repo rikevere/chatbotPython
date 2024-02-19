@@ -5,6 +5,8 @@ import os
 from time import sleep
 from helpers import *
 from retorna_previsao_meteoblue import *
+from retorna_periodo import *
+from retorna_relatorios import *
 
 load_dotenv()
 
@@ -75,7 +77,29 @@ minhas_tools = [
                                 "required": ["previsao", "cidade"],
                         }
                 }
+        },
+        {
+            "type": "function",
+                        "function": {
+                        "name": "retorna_vendas_clientes_período",
+                        "description": "Busca dados de relatórios sobre o negócio, como saldos de estoque, contas a receber, a pagar e vendas no período",
+                        "parameters": {
+                                "type": "object",
+                                "properties": {
+                                        "periodo": {
+                                                "type": "string",
+                                                "description": "Determina o período para o qual deseja solicitar os dados. Pode ser Hoje, Semana, Mês ou Ano"
+                                        },
+                                        "relatorio": {
+                                                "type": "string",
+                                                "description": "Informa o tipo de relatório solicitado",
+                                        },
+                                },
+                                "required": ["período", "relatório"],
+                        }
+                }
         }
+
 
 ]
 #Para que ela possa identificar que é um desvio de processo, que é uma ação que não vai depender 
@@ -114,23 +138,77 @@ def validar_codigo_promocional(argumentos):
 def retornar_previsao_cidadevere(argumentos):
         previsao = argumentos.get("previsao")
         cidade = argumentos.get("cidade")
+        print(cidade)
         if cidade=='Verê':
                 clima = obter_previsao_tempo(API_KEY, LATITUDE, LONGITUDE)
                 return f"""
                 
                 # Formato de Resposta
 
-                Resumo da previsão para a semana com base nestes dados: {clima}. 
+                Resumo da previsão semanal do tempo para a cidade de {cidade} com base nestes dados: {clima}. 
                 Ainda, descorra sobre as recomendações de roupas fitness e cuidados com a saúde e o corpo com base na previsão do tempo para a semana.
                 Se algum dia da semana tiver probabilidade maior do que 30% de chuva, recomende roupas fitness para este tipo de ambiente, com atenção ao dia em que vai ocorrer.
                 Sugira no mínimo 3  atividades físicas ao ar livre, de acordo com o clima para cada dia da semana.
-                              
-                """
-        else:
-               "Desculpe, mas não tenho informações para esta cidade"         
+                                
+                """        
+        
+def retorna_vendas_clientes_periodo(argumentos):
+        periodo = argumentos.get("periodo")
+        relatorio = argumentos.get("relatorio")
+        print(f"Perído com origem no Chat: {periodo}")
+        print(f"Análise escolhida: {relatorio}")
+        data_referencia = "12/04/2023"  # Data de referência para os cálculos
+        
+        print(f"Dados do Relatório: {dados_relatorio}")
+        if relatorio.lower() == 'vendas':
+                dtini, dtfim = obter_intervalo_data(periodo, data_referencia)
+                dados_relatorio = retorna_dados_vendas(dtini, dtfim)
+                return f"""
+                        
+                        # Formato de Resposta
+
+                        Você é um especialista em BI e ciência de dados que atua na controladoria da empresa. 
+                        Baseado nos dados de vendas a seguir, emita um parecer apresentando insigts ao CEO da empresa relativo aos dados apresentados
+                        Ainda, apresente o período com maior faturamento e uma lista com os 5 clientes com maior volume de compra
+                        Apresente outras informações relevantes sobre os dados apresentados.
+
+                        Estes são dos dados das vendas:
+                        {dados_relatorio}
+                                        
+                        """ 
+        elif relatorio.lower() == 'contas a pagar':
+              return f"""
+                        
+                        # Formato de Resposta
+
+                        Você é um especialista em BI e ciência de dados que atua na controladoria da empresa. 
+                        Baseado nos dados de vendas a seguir, emita um parecer apresentando insigts ao CEO da empresa relativo aos dados apresentados
+                        Ainda, apresente o período com maior faturamento e uma lista com os 5 clientes com maior volume de compra
+                        Apresente outras informações relevantes sobre os dados apresentados.
+
+                        Estes são dos dados das vendas:
+                        {dados_relatorio}
+                                        
+                        """  
+        elif relatorio.lower() == 'contas a receber':
+               return f"""
+                        
+                        # Formato de Resposta
+
+                        Você é um especialista em BI e ciência de dados que atua na controladoria da empresa. 
+                        Baseado nos dados de vendas a seguir, emita um parecer apresentando insigts ao CEO da empresa relativo aos dados apresentados
+                        Ainda, apresente o período com maior faturamento e uma lista com os 5 clientes com maior volume de compra
+                        Apresente outras informações relevantes sobre os dados apresentados.
+
+                        Estes são dos dados das vendas:
+                        {dados_relatorio}
+                                        
+                        """ 
+
 
 # dicionário global que será responsável por garantir que tenhamos todas as funcionalidades que associamos até esse momento
 minhas_funcoes = {
     "validar_codigo_promocional": validar_codigo_promocional,
     "retornar_previsao_cidadevere": retornar_previsao_cidadevere,
+    "retorna_vendas_clientes_período": retorna_vendas_clientes_periodo
 }

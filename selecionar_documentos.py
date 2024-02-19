@@ -9,9 +9,9 @@ load_dotenv()
 cliente = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 modelo = "gpt-4-1106-preview"
 
-politicas_limalimao = carrega('chatbotPython/dados/politicas_limalimao.txt')
-dados_limalimao = carrega('chatbotPython/dados/dados_limalimao.txt')
-produtos_limalimao = carrega('chatbotPython/dados/produtos_limalimao.txt')
+politicas_limalimao = carrega('dados/politicas_limalimao.txt')
+dados_limalimao = carrega('dados/dados_limalimao.txt')
+produtos_limalimao = carrega('dados/produtos_limalimao.txt')
 
 def selecionar_documento(resposta_openai):
     if "políticas" in resposta_openai:
