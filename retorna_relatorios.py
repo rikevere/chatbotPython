@@ -2,21 +2,13 @@ from dotenv import load_dotenv
 import fdb
 import os
 from retorna_periodo import *
+from conecta_firebird import pega_conexao_fb
 
 load_dotenv()
 
-# Substitua estas variáveis pelos seus valores reais
-hostname = '127.0.0.1'  # ou IP do servidor
-database = 'c:/viasoft/dados/dadosnovo.fdb'
-user = os.getenv("USER_FIREBIRD")
-password = os.getenv("PASSWORD_FIREBIRD")
-port = 3050  # Porta padrão do Firebird
-
-try:
-    con = fdb.connect(host=hostname, database=database, user=user, password=password, port=port)
-    print("Conexão com o banco de dados estabelecida com sucesso.")
-    # Executando uma consulta SQL
-    def retorna_dados_vendas(dataini, datafim):      
+def retorna_dados_vendas(dataini, datafim):   
+    con = pega_conexao_fb()
+    try:   
         cur = con.cursor()
         cur.execute(f"""SELECT                      
                     PCABVDA.EMPRESA,  
@@ -49,12 +41,17 @@ try:
         # Obtendo os valores
         valores = cur.fetchall()
 
-        # Fecha o cursor
-        cur.close()
-
         return colunas, valores
+    
+    except Exception as e:
+        print(f"Erro ao executar operações no banco de dados: {e}")
+    finally:
+    # Fecha a conexão com o banco de dados
+        con.close()
 
-    def retorna_dados_contas_a_pagar(dataini, datafim):
+def retorna_dados_contas_a_pagar(dataini, datafim):
+    con = pega_conexao_fb()
+    try:        
         cur = con.cursor()
         cur.execute(f"""SELECT VDUPPAG.DUPPAG, VDUPPAG.DTEMISSAO,
                     VDUPPAG.DTENTRADA, VDUPPAG.DTPREVREC, 
@@ -96,12 +93,18 @@ try:
         # Obtendo os valores
         valores = cur.fetchall()
 
-        # Fecha o cursor
-        cur.close()
-
         return colunas, valores
 
-    def retorna_dados_contas_a_receber(dataini, datafim):
+    except Exception as e:
+        print(f"Erro ao executar operações no banco de dados: {e}")
+    finally:
+    # Fecha a conexão com o banco de dados
+        con.close()    
+
+
+def retorna_dados_contas_a_receber(dataini, datafim):
+    con = pega_conexao_fb() 
+    try:    
         cur = con.cursor()
         cur.execute(f"""SELECT VDUPREC.DUPREC,      VDUPREC.CLIENTE,      VDUPREC.DTEMISSAO, 
                     VDUPREC.DTVENCTO,    VDUPREC.JUROS,        VDUPREC.DESCONTO, 
@@ -143,14 +146,21 @@ try:
         # Obtendo os valores
         valores = cur.fetchall()
 
-        # Fecha o cursor
-        cur.close()
-
         return colunas, valores
-          
-except Exception as e:
-    print(f"Erro ao executar operações no banco de dados: {e}")
-finally:
-    # Certifique-se de que a conexão seja fechada
-    if con:
-        con.close()
+    
+    except Exception as e:
+        print(f"Erro ao executar operações no banco de dados: {e}")
+    finally:
+    # Fecha a conexão com o banco de dados
+        con.close()    
+
+#dtini = '04-10-2023'
+#dtfim = '04-19-2023'
+
+#dados = retorna_dados_vendas(dtini, dtfim)
+#dados1 = retorna_dados_contas_a_pagar(dtini, dtfim)
+#dados2 = retorna_dados_contas_a_receber(dtini, dtfim)
+
+#print(dados)
+#print(dados1)
+#print(dados2)

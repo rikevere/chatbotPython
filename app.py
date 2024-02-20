@@ -110,9 +110,11 @@ def bot(prompt):
                     run_id = run.id,
                     tool_outputs=respostas_tools_acionadas
                     )
-                print("não entrou nas funções")
             historico = list(cliente.beta.threads.messages.list(thread_id=thread_id).data)
             resposta = historico[0]
+            #for um_historico in historico:
+            print(historico)
+
             return resposta    
             
         except Exception as erro:

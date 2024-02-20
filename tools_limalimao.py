@@ -7,6 +7,7 @@ from helpers import *
 from retorna_previsao_meteoblue import *
 from retorna_periodo import *
 from retorna_relatorios import *
+import html
 
 load_dotenv()
 
@@ -88,14 +89,18 @@ minhas_tools = [
                                 "properties": {
                                         "periodo": {
                                                 "type": "string",
-                                                "description": "Determina o período para o qual deseja solicitar os dados. Pode ser Hoje, Semana, Mês ou Ano"
+                                                "description": "Determina o período para o qual deseja solicitar os dados. Pode ser Hoje, Semana, Mês, Ano, Bimestre, Semestre, Trimestre, Quatrimestre."
                                         },
                                         "relatorio": {
                                                 "type": "string",
                                                 "description": "Informa o tipo de relatório solicitado",
                                         },
+                                        "ano": {
+                                                "type": "string",
+                                                "description": "Retorna o ano de referência, caso algum período referencie um ano expecífico",
+                                        },
                                 },
-                                "required": ["periodo", "relatorio"],
+                                "required": ["periodo", "relatorio", "ano"],
                         }
                 }
         }
@@ -139,7 +144,7 @@ def retornar_previsao_cidadevere(argumentos):
         previsao = argumentos.get("previsao")
         cidade = argumentos.get("cidade")
         print(cidade)
-        if cidade=='Verê':
+        if cidade.lower() == 'verê' or cidade.lower() == 'vere':
                 clima = obter_previsao_tempo(API_KEY, LATITUDE, LONGITUDE)
                 return f"""
                 
@@ -155,39 +160,50 @@ def retornar_previsao_cidadevere(argumentos):
 def retorna_relatorios_periodo(argumentos):
         periodo = argumentos.get("periodo")
         relatorio = argumentos.get("relatorio")
+        ano = argumentos.get("ano")
         print(f"Perído com origem no Chat: {periodo}")
         print(f"Análise escolhida: {relatorio}")
+        print(f"Ano identificado: {ano}")
         data_referencia = "12/04/2023"  # Data de referência para os cálculos
-        
-        print(f"Dados do Relatório: {dados_relatorio}")
+        dtini, dtfim = obter_intervalo_data(periodo, data_referencia, ano)
+        print(f"datas: {dtini, dtfim, ano}")
         if relatorio.lower() == 'vendas':
-                dtini, dtfim = obter_intervalo_data(periodo, data_referencia)
                 dados_relatorio = retorna_dados_vendas(dtini, dtfim)
-                return f"""
-                        
-                        # Formato de Resposta
+                if dados_relatorio:
+                       return f"""
+                                
+                                # Formato de Resposta
 
-                        Você é um especialista em BI e ciência de dados que atua na controladoria da empresa. 
-                        Baseado nos dados de vendas a seguir, emita um parecer apresentando insigts ao CEO da empresa relativo aos dados apresentados
-                        Ainda, apresente o período com maior faturamento e uma lista com os 5 clientes com maior volume de compra
-                        Apresente outras informações relevantes sobre os dados apresentados.
+                                Você é um especialista em BI e ciência de dados que atua na controladoria da empresa. 
+                                Baseado nos dados de vendas a seguir, emita um parecer apresentando insigts a direção da empresa relativo aos dados apresentados
+                                Ainda, apresente o período com maior faturamento e uma lista com os 5 clientes com maior volume de compra
+                                Apresente outras informações relevantes sobre os dados apresentados.
+                                Valores financeiros sempre devem contemplar o símbolo de Reais (R$). Por exemplo: R$ 1.250,00
 
-                        Estes são dos dados das vendas:
-                        {dados_relatorio}
-                                        
-                        """ 
+                                Estes são dos dados das vendas:
+                                {dados_relatorio}
+                                                
+                                """ 
+                else:
+                        print("Não está retornando dados SQL")
+                        return f"""
+                                
+                                # Formato de Resposta
+
+                                Não tivemos vendas neste período."""
+
         elif relatorio.lower() == 'contas a pagar':
-                dtini, dtfim = obter_intervalo_data(periodo, data_referencia)
                 dados_relatorio = retorna_dados_contas_a_pagar(dtini, dtfim)
                 return f"""
                         
                         # Formato de Resposta
 
                         Você é um gerente financeiro de alta eficácia e previbilidade na gestão do contas a pagar da empresa. 
-                        Baseado nos dados de contas a pagar a seguir, emita um parecer apresentando insigts ao CEO da empresa 
+                        Baseado nos dados de contas a pagar a seguir, emita um parecer apresentando insigts a direção da empresa 
                         relativo aos dados apresentados e qual a melhor estratégia para a manutenção da saúde financeira da empresa
-                        Apresente dados sobre o maior agrupamento de despesas e pontos de atenção a vencimentos e definição de datas estratégicas para pagamentos
-                        Se tiver acesso aos dados das vendas, emita estratégias de cruzamento de informações que beneficiem o pagamento dos compromissos com fornecedores
+                        Apresente dados sobre o maior agrupamento de despesas, fornecedor com maior valor de faturamento
+                        e pontos de atenção a vencimentos e definição de datas estratégicas para pagamentos.
+                        Somente se tiver acesso aos dados das vendas em seu histórico, emita estratégias de cruzamento de informações que beneficiem o pagamento dos compromissos com fornecedores
                         Apresente outras informações relevantes sobre os dados apresentados.
 
                         Estes são dos dados do contas a pagar:
@@ -195,17 +211,17 @@ def retorna_relatorios_periodo(argumentos):
                                         
                         """  
         elif relatorio.lower() == 'contas a receber':
-               dtini, dtfim = obter_intervalo_data(periodo, data_referencia)
                dados_relatorio = retorna_dados_contas_a_receber(dtini, dtfim)
                return f"""
                         
                         # Formato de Resposta
 
                         Você é um gerente financeiro de alta eficácia e previbilidade na gestão do contas a receber da empresa.
-                        Baseado nos dados de contas a receber a seguir, emita um parecer apresentando insigts ao CEO da empresa 
+                        Baseado nos dados de contas a receber a seguir, emita um parecer apresentando insigts a direção da empresa 
                         relativo aos dados apresentados e qual a melhor estratégia para a manutenção da saúde financeira da empresa. Como os juros e descontos tem influenciado.
-                        Apresente dados sobre o maior agrupamento de receitas e pontos de atenção a vencimentos e definição de datas estratégicas para os recebimentos
-                        Se tiver acesso aos dados das vendas e contas a pagar, emita estratégias de cruzamento de informações que beneficiem o pagamento dos compromissos com fornecedores,
+                        Apresente dados sobre o maior agrupamento de receitas e clientes com maior valor a receber, bem como, pontos de atenção a vencimentos e 
+                        definição de datas estratégicas para os recebimentos.
+                        Somente se tiver acesso aos dados das vendas e contas a pagar em seu histórico, emita estratégias de cruzamento de informações que beneficiem o pagamento dos compromissos com fornecedores,
                         o aumento das vendas e um fluxo de caixa adequado.
                         Apresente outras informações relevantes sobre os dados apresentados.
 
