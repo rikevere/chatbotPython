@@ -15,7 +15,7 @@ cliente = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 modelo = "gpt-4-1106-preview"
 
 app = Flask(__name__)
-app.secret_key = 'alura'
+app.secret_key = 'lima_limao'
 
 assistente = pegar_json()
 thread_id = assistente["thread_id"]
@@ -35,29 +35,33 @@ def bot(prompt):
 
     while True:
         try:
-            personalidade = personas[selecionar_persona(prompt)]
+            #Código para análise de personalidade
+            #personalidade = personas[selecionar_persona(prompt)]
 
-            cliente.beta.threads.messages.create(
-                thread_id=thread_id, 
-                role = "user",
-                content =  f"""
-                Assuma, de agora em diante, a personalidade abaixo. 
-                Ignore as personalidades anteriores.
+            #cliente.beta.threads.messages.create(
+            #    thread_id=thread_id, 
+            #    role = "user",
+            #    content =  f"""
+            #    Assuma, de agora em diante, a personalidade abaixo. 
+            #    Ignore as personalidades anteriores.
 
                 # Persona
-                {personalidade}
-                """,
-                file_ids=file_ids
-            )
-            print("finalizou o ajuste de personalidade")
+            #    {personalidade}
+            #    """,
+            #    file_ids=file_ids
+            #)
+            #print("finalizou o ajuste de personalidade")
+            
+            #Código para análise de imagens
+            #resposta_vision = ""
+            #if caminho_imagem_enviada != None:
+            #    resposta_vision = analisar_imagem(caminho_imagem_enviada)
+            #    resposta_vision+= ". Na resposta final, apresente detalhes da descrição da imagem."
+            #    os.remove(caminho_imagem_enviada)
+            #    caminho_imagem_enviada = None
+            #print("Concluiu a analise de imagem")
 
             resposta_vision = ""
-            if caminho_imagem_enviada != None:
-                resposta_vision = analisar_imagem(caminho_imagem_enviada)
-                resposta_vision+= ". Na resposta final, apresente detalhes da descrição da imagem."
-                os.remove(caminho_imagem_enviada)
-                caminho_imagem_enviada = None
-            print("Concluiu a analise de imagem")
 
             cliente.beta.threads.messages.create(
             thread_id=thread_id,
@@ -70,7 +74,6 @@ def bot(prompt):
                     thread_id=thread_id,
                     assistant_id=assistente_id
                 )
-            print("entrando no While")
             while run.status !=STATUS_COMPLETED:
                 run = cliente.beta.threads.runs.retrieve(
                     thread_id=thread_id,
@@ -78,7 +81,7 @@ def bot(prompt):
             )
                 #Inserimos o log para poder verificar o status de como o assistente está de fato se comportando
                 print(f"Status: {run.status}")
-
+                sleep(1)  # Pausa por 1 segundo para limitar a frequência das requisições
                 #desvio condicional que verificará se o status da execução em cima da thread que foi criada pelo assistente é um status de ação requerida
                 if run.status == STATUS_REQUIRES_ACTION:
                     print("entrou nas funções")
@@ -110,6 +113,7 @@ def bot(prompt):
                     run_id = run.id,
                     tool_outputs=respostas_tools_acionadas
                     )
+                    
             historico = list(cliente.beta.threads.messages.list(thread_id=thread_id).data)
             resposta = historico[0]
             #for um_historico in historico:

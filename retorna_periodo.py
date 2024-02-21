@@ -4,18 +4,18 @@ from datetime import datetime, timedelta
 
 def obter_intervalo_data(periodo, data_referencia, anoref):
     # Define a data de referência
-    if not data_referencia:
+    if not data_referencia and anoref:
+        data_referencia = datetime.now()
+        data_referencia = datetime.strptime(str(data_referencia.day)+'/'+str(data_referencia.month)+'/'+str(anoref), "%d/%m/%Y")
+    elif not data_referencia and not anoref:
         data_referencia = datetime.now()
     else:
         # Assume que data_referencia está no formato "dd/mm/aaaa"
         data_referencia = datetime.strptime(data_referencia, "%d/%m/%Y")
     #verifica se foi informado ano na consulta
-    if not anoref:
-        ano = data_referencia.year
-        print(f"Ano Sistema: {ano}")
-    else:
-        ano = int(anoref)
-        print(f"anoref: {ano}")
+    ano = data_referencia.year
+    print(f"Ano Sistema: {ano}")
+    print(f"Data Referência: {data_referencia}")
     
     if periodo.lower() == "hoje":
         dtini = dtfim = data_referencia.strftime("%m-%d-%Y")
@@ -146,10 +146,10 @@ def obter_intervalo_data(periodo, data_referencia, anoref):
     return dtini, dtfim
 
 # Exemplo de uso
-#data_ludwig = None  # Data de referência para os cálculos
-#anoteste = '2023'
-#periodo = "Semestre"  # Pode ser "hoje", "semana", "mês", "ano"
+data_ludwig = None  # Data de referência para os cálculos
+anoteste = '2022'
+periodo = "terceiro quatrimestre"  # Pode ser "hoje", "semana", "mês", "ano"
 
 
-#dtini, dtfim = obter_intervalo_data(periodo, data_ludwig, anoteste)
-#print(f"Período: {periodo.capitalize()}, Data Inicial: '{dtini}', Data Final: {dtfim}")
+dtini, dtfim = obter_intervalo_data(periodo, data_ludwig, anoteste)
+print(f"Período: {periodo.capitalize()}, Data Inicial: '{dtini}', Data Final: {dtfim}")

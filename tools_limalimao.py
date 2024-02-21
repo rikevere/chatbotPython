@@ -89,7 +89,7 @@ minhas_tools = [
                                 "properties": {
                                         "periodo": {
                                                 "type": "string",
-                                                "description": "Determina o período para o qual deseja solicitar os dados. Pode ser Hoje, Semana, Mês, Ano, Bimestre, Semestre, Trimestre, Quatrimestre."
+                                                "description": "Determina o período para o qual deseja solicitar os dados."
                                         },
                                         "relatorio": {
                                                 "type": "string",
@@ -97,7 +97,7 @@ minhas_tools = [
                                         },
                                         "ano": {
                                                 "type": "string",
-                                                "description": "Retorna o ano de referência, caso algum período referencie um ano expecífico",
+                                                "description": "Retorna o ano de referência, caso algum período referencie um ano expecífico. Caso nenhum ano seja informado de forma específica, o ano atual deve ser retornado.",
                                         },
                                 },
                                 "required": ["periodo", "relatorio", "ano"],
@@ -164,11 +164,16 @@ def retorna_relatorios_periodo(argumentos):
         print(f"Perído com origem no Chat: {periodo}")
         print(f"Análise escolhida: {relatorio}")
         print(f"Ano identificado: {ano}")
-        data_referencia = "12/04/2023"  # Data de referência para os cálculos
+        data_referencia = None  # Data de referência para os cálculos
         dtini, dtfim = obter_intervalo_data(periodo, data_referencia, ano)
         print(f"datas: {dtini, dtfim, ano}")
-        if relatorio.lower() == 'vendas':
-                dados_relatorio = retorna_dados_vendas(dtini, dtfim)
+        if relatorio.lower() == 'vendas' or relatorio.lower() == 'venda' or relatorio.lower() == 'vendido':
+                try:
+                        dados_relatorio = retorna_dados_vendas(dtini, dtfim)
+                except Exception as erro:
+                        "Erro na chamada da função Dados Vendas: %s" % erro
+                        print('"Erro na chamada da função Dados Vendas:', erro)
+                        sleep(1)        
                 if dados_relatorio:
                        return f"""
                                 
@@ -190,46 +195,79 @@ def retorna_relatorios_periodo(argumentos):
                                 
                                 # Formato de Resposta
 
-                                Não tivemos vendas neste período."""
+                                Não existem dados a fornecer para o período"""
 
-        elif relatorio.lower() == 'contas a pagar':
-                dados_relatorio = retorna_dados_contas_a_pagar(dtini, dtfim)
-                return f"""
+        elif relatorio.lower() == 'contas a pagar' or relatorio.lower() == 'pagar' or relatorio.lower() == 'pagamento' or relatorio.lower() == 'fornecedor':
+                try:
+                        dados_relatorio = retorna_dados_contas_a_pagar(dtini, dtfim)
+                except Exception as erro:
+                        "Erro na chamada da função Contas a Pagar: %s" % erro
+                        print('"Erro na chamada da função Contas a Pagar:', erro)
+                        sleep(1)   
+                if dados_relatorio:         
+                        return f"""
+                                
+                                # Formato de Resposta
+
+                                Você é um gerente financeiro de alta eficácia e previbilidade na gestão do contas a pagar da empresa. 
+                                Baseado nos dados de contas a pagar a seguir, emita um parecer apresentando insigts a direção da empresa 
+                                relativo aos dados apresentados e qual a melhor estratégia para a manutenção da saúde financeira da empresa
+                                Apresente dados sobre o maior agrupamento de despesas, fornecedor com maior valor de faturamento
+                                e pontos de atenção a vencimentos e definição de datas estratégicas para pagamentos.
+                                Somente se tiver acesso aos dados das vendas em seu histórico, emita estratégias de cruzamento de informações que beneficiem o pagamento dos compromissos com fornecedores
+                                Apresente outras informações relevantes sobre os dados apresentados.
+
+                                Estes são dos dados do contas a pagar:
+                                {dados_relatorio}
+                                                
+                                """  
+                else:
+                        print("Não está retornando dados SQL")
+                        return f"""
+                                
+                                # Formato de Resposta
+
+                                Não existem dados a fornecer para o período"""
+                
+        elif relatorio.lower() == 'contas a receber' or relatorio.lower() == 'receber' or relatorio.lower() == 'recebimento' or relatorio.lower() == 'clientes' or relatorio.lower() == 'recebiveis':
+                try:
+                        dados_relatorio = retorna_dados_contas_a_receber(dtini, dtfim)
+                except Exception as erro:
+                        "Erro na chamada da função Contas a Receber: %s" % erro
+                        print('"Erro na chamada da função Contas a Receber:', erro)
+                        sleep(1)   
+                if dados_relatorio:
+                        return f"""
+                                        
+                                        # Formato de Resposta
+
+                                        Você é um gerente financeiro de alta eficácia e previbilidade na gestão do contas a receber da empresa.
+                                        Baseado nos dados de contas a receber a seguir, emita um parecer apresentando insigts a direção da empresa 
+                                        relativo aos dados apresentados e qual a melhor estratégia para a manutenção da saúde financeira da empresa. Como os juros e descontos tem influenciado.
+                                        Apresente dados sobre o maior agrupamento de receitas e clientes com maior valor a receber, bem como, pontos de atenção a vencimentos e 
+                                        definição de datas estratégicas para os recebimentos.
+                                        Somente se tiver acesso aos dados das vendas e contas a pagar em seu histórico, emita estratégias de cruzamento de informações que beneficiem o pagamento dos compromissos com fornecedores,
+                                        o aumento das vendas e um fluxo de caixa adequado.
+                                        Apresente outras informações relevantes sobre os dados apresentados.
+
+                                        Estes são dos dados do contas a receber:
+                                        {dados_relatorio}
+                                                        
+                                        """ 
+                else:
+                        print("Não está retornando dados SQL")
+                        return f"""
                         
                         # Formato de Resposta
 
-                        Você é um gerente financeiro de alta eficácia e previbilidade na gestão do contas a pagar da empresa. 
-                        Baseado nos dados de contas a pagar a seguir, emita um parecer apresentando insigts a direção da empresa 
-                        relativo aos dados apresentados e qual a melhor estratégia para a manutenção da saúde financeira da empresa
-                        Apresente dados sobre o maior agrupamento de despesas, fornecedor com maior valor de faturamento
-                        e pontos de atenção a vencimentos e definição de datas estratégicas para pagamentos.
-                        Somente se tiver acesso aos dados das vendas em seu histórico, emita estratégias de cruzamento de informações que beneficiem o pagamento dos compromissos com fornecedores
-                        Apresente outras informações relevantes sobre os dados apresentados.
-
-                        Estes são dos dados do contas a pagar:
-                        {dados_relatorio}
-                                        
-                        """  
-        elif relatorio.lower() == 'contas a receber':
-               dados_relatorio = retorna_dados_contas_a_receber(dtini, dtfim)
-               return f"""
+                        Não existem dados a fornecer para o período"""
+                  
+        else:
+             return f"""
                         
                         # Formato de Resposta
 
-                        Você é um gerente financeiro de alta eficácia e previbilidade na gestão do contas a receber da empresa.
-                        Baseado nos dados de contas a receber a seguir, emita um parecer apresentando insigts a direção da empresa 
-                        relativo aos dados apresentados e qual a melhor estratégia para a manutenção da saúde financeira da empresa. Como os juros e descontos tem influenciado.
-                        Apresente dados sobre o maior agrupamento de receitas e clientes com maior valor a receber, bem como, pontos de atenção a vencimentos e 
-                        definição de datas estratégicas para os recebimentos.
-                        Somente se tiver acesso aos dados das vendas e contas a pagar em seu histórico, emita estratégias de cruzamento de informações que beneficiem o pagamento dos compromissos com fornecedores,
-                        o aumento das vendas e um fluxo de caixa adequado.
-                        Apresente outras informações relevantes sobre os dados apresentados.
-
-                        Estes são dos dados do contas a receber:
-                        {dados_relatorio}
-                                        
-                        """ 
-
+                        Não foi possível identificar o relatório desejado"""    
 
 # dicionário global que será responsável por garantir que tenhamos todas as funcionalidades que associamos até esse momento
 minhas_funcoes = {
