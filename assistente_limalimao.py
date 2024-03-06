@@ -63,15 +63,21 @@ def pegar_json():
     
 
 def criar_thread():
+    #Threads não têm limite de tamanho. Você pode adicionar quantas mensagens quiser a um tópico. 
+    #O Assistente garantirá que as solicitações ao modelo se ajustem à janela de contexto máxima, 
+    #usando técnicas de otimização relevantes, como truncamento, que testamos extensivamente com ChatGPT. 
+    #Ao usar a API Assistants, você delega o controle sobre quantos tokens de entrada são passados ​​ao modelo 
+    #para qualquer execução, o que significa que você tem menos controle sobre o custo de execução do seu Assistant 
+    #em alguns casos, mas não precisa lidar com a complexidade de gerenciar você mesmo a janela de contexto.
     return cliente.beta.threads.create()
 
 def criar_assistente(file_ids=[]):
         assistente = cliente.beta.assistants.create(
                 name="Atendente limalimao",
                 instructions = f"""
-                                Você é um chatbot de atendimento a clientes de um e-commerce. 
-                                Você não deve responder perguntas que não sejam dados do ecommerce informado.
-                                Além disso, acesse os arquivos associados a você e a thread para responder as perguntas.
+                                Você é analista de dados de uma empresa. Especialista em BI. 
+                                Você não deve responder perguntas que não sejam dos dados fornecidos em functions calling
+                                Além disso, a thread para responder as perguntas.
                                 """,
                 model = modelo,
                 tools=minhas_tools,

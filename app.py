@@ -12,7 +12,8 @@ import uuid
 load_dotenv()
 
 cliente = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-modelo = "gpt-4-1106-preview"
+modelo = "gpt-3.5-turbo-0125"
+#modelo = "gpt-4-1106-preview"
 
 app = Flask(__name__)
 app.secret_key = 'lima_limao'
@@ -107,7 +108,7 @@ def bot(prompt):
                                 "tool_call_id": uma_tool.id,
                                 "output": resposta_funcao
                             })
-                    
+                        print(respostas_tools_acionadas)
                     run = cliente.beta.threads.runs.submit_tool_outputs(
                     thread_id = thread_id,
                     run_id = run.id,

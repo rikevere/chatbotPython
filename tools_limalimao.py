@@ -1,4 +1,5 @@
-from flask import Flask,render_template, request, Response
+from EventosAgendaGoogle.criar_evento_calendario import criar_evento_chatgpt
+from flask import Flask, render_template, request, Response
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
@@ -101,6 +102,43 @@ minhas_tools = [
                                         },
                                 },
                                 "required": ["periodo", "relatorio", "ano"],
+                        }
+                }
+        },   
+        {       
+            "type": "function",
+                        "function": {
+                        "name": "cria_agendas_google",
+                        "description": "Cria eventos na agenda do Google",
+                        "parameters": {
+                                "type": "object",
+                                "properties": {
+                                        "calendar_id": {
+                                                "type": "string",
+                                                "description": "Especifica em qual agenda o compromisso deve ser criado."
+                                        },
+                                        "title": {
+                                                "type": "string",
+                                                "description": "Especifica qual o título que o evento na agenda deve conter",
+                                        },
+                                        "description": {
+                                                "type": "string",
+                                                "description": "Especifica uma descrição de pauta para o evento.",
+                                        },
+                                        "start_time": {
+                                                "type": "string",
+                                                "description": "Determina o dia e o horário de início do evento e Converte as datas para o formato UTC.",
+                                        },
+                                        "end_time": {
+                                                "type": "string",
+                                                "description": "Determina o dia e o horário de fim do evento e Converte as datas para o formato UTC.",
+                                        },
+                                        "color_id": {
+                                                "type": "string",
+                                                "description": "Determina a cor desejada para o evento.",
+                                        },
+                                },
+                                "required": ["calendar_id", "title", "description", "start_time", "end_time", "color_id"],
                         }
                 }
         }
@@ -273,5 +311,6 @@ def retorna_relatorios_periodo(argumentos):
 minhas_funcoes = {
     "validar_codigo_promocional": validar_codigo_promocional,
     "retornar_previsao_cidadevere": retornar_previsao_cidadevere,
-    "retorna_vendas_clientes_período": retorna_relatorios_periodo
+    "retorna_vendas_clientes_período": retorna_relatorios_periodo,
+    "cria_agendas_google": criar_evento_chatgpt
 }
