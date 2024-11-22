@@ -1,13 +1,12 @@
 from dotenv import load_dotenv
-import fdb
 import os
 from retorna_periodo import *
-from conecta_firebird import pega_conexao_fb
+from conecta_db2 import pega_conexao_db2
 
 load_dotenv()
 
 def retorna_dados_vendas(dataini, datafim):   
-    con = pega_conexao_fb()
+    con = pega_conexao_db2()
     try:   
         cur = con.cursor()
         cur.execute(f"""SELECT                      
@@ -50,7 +49,7 @@ def retorna_dados_vendas(dataini, datafim):
         con.close()
 
 def retorna_dados_contas_a_pagar(dataini, datafim):
-    con = pega_conexao_fb()
+    con = pega_conexao_db2()
     try:        
         cur = con.cursor()
         cur.execute(f"""SELECT VDUPPAG.DUPPAG, VDUPPAG.DTEMISSAO,
@@ -103,7 +102,7 @@ def retorna_dados_contas_a_pagar(dataini, datafim):
 
 
 def retorna_dados_contas_a_receber(dataini, datafim):
-    con = pega_conexao_fb() 
+    con = pega_conexao_db2() 
     try:    
         cur = con.cursor()
         cur.execute(f"""SELECT VDUPREC.DUPREC,      VDUPREC.CLIENTE,      VDUPREC.DTEMISSAO, 
