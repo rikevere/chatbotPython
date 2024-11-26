@@ -37,21 +37,21 @@ def bot(prompt):
     while True:
         try:
             #Código para análise de personalidade
-            #personalidade = personas[selecionar_persona(prompt)]
+            personalidade = personas[selecionar_persona(prompt)]
 
-            #cliente.beta.threads.messages.create(
-            #    thread_id=thread_id, 
-            #    role = "user",
-            #    content =  f"""
-            #    Assuma, de agora em diante, a personalidade abaixo. 
-            #    Ignore as personalidades anteriores.
+            cliente.beta.threads.messages.create(
+                thread_id=thread_id, 
+                role = "user",
+                content =  f"""
+                Assuma, de agora em diante, a personalidade abaixo. 
+                Ignore as personalidades anteriores.
 
-                # Persona
-            #    {personalidade}
-            #    """,
-            #    file_ids=file_ids
-            #)
-            #print("finalizou o ajuste de personalidade")
+                Persona
+                {personalidade}
+                """,
+                file_ids=file_ids
+            )
+            print("finalizou o ajuste de personalidade")
             
             #Código para análise de imagens
             #resposta_vision = ""

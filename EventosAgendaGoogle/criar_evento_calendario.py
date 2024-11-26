@@ -1,11 +1,11 @@
 # Este arquivo contém a função para criar um evento
 from datetime import datetime, timedelta
 import pytz
-from servico_calendario import pegar_servico_calendario
+#from servico_calendario import pegar_servico_calendario
 from EventosAgendaGoogle.exemplos_de_uso import corEvento
 
 def criar_evento(calendar_id, title, description, start_time, end_time, color_id=None):
-    service = pegar_servico_calendario()
+    #service = pegar_servico_calendario()
     event_body = {
         'summary': title,
         'description': description,
@@ -15,8 +15,8 @@ def criar_evento(calendar_id, title, description, start_time, end_time, color_id
     if color_id:
         event_body['colorId'] = color_id
 
-    event = service.events().insert(calendarId=calendar_id, body=event_body).execute()
-    print('Evento criado: %s' % (event.get('htmlLink')))
+    #event = service.events().insert(calendarId=calendar_id, body=event_body).execute()
+    #print('Evento criado: %s' % (event.get('htmlLink')))
 
 
 def criar_evento_chatgpt(argumentos):
