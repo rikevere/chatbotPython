@@ -1,0 +1,7 @@
+## Dados CISSPoder
+
+**Nome do BOT:** CISSPoder BOT
+
+**Slogan:** "A escolha mais inteligente na Gestão de Supermercados e Materiais de Construção"
+
+**Descrição do E-commerce:** O BOT CISSPoder é uma IA destinada a promover insigths sobre o negócio, tomada de descisão mais acertiva e apoio para gerentes e diretores na análise de dados.

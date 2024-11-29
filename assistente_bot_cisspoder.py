@@ -5,39 +5,39 @@ from time import sleep
 from helpers import *
 from selecionar_persona import *
 import json
-from tools_limalimao import *
+from chatbotPython.tools_bot_cisspoder_old import *
 
 load_dotenv()
 
 cliente = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 modelo = "gpt-4-1106-preview"
-contexto = carrega("dados/limalimao.txt")
+contexto = carrega("dados/bot_cisspoder.txt")
 
 def criar_lista_ids():
         lista_ids_arquivos = []
 
         file_dados = cliente.files.create(
-                file=open("dados/dados_limalimao.txt", "rb"),
+                file=open("dados/dados_bot_cisspoder.txt", "rb"),
                 purpose="assistants"
         )
         lista_ids_arquivos.append(file_dados.id)
 
         file_politicas = cliente.files.create(
-                file=open("dados/politicas_limalimao.txt", "rb"),
+                file=open("dados/politicas_bot_cisspoder.txt", "rb"),
                 purpose="assistants"
         )
         lista_ids_arquivos.append(file_politicas.id)
 
-        file_produtos = cliente.files.create(
-                file=open("dados/produtos_limalimao.txt","rb"),
+        file_recursos = cliente.files.create(
+                file=open("dados/recursos_bot_cisspoder.txt","rb"),
                 purpose="assistants"
         )
 
-        lista_ids_arquivos.append(file_produtos.id)
+        lista_ids_arquivos.append(file_recursos.id)
         return lista_ids_arquivos
 
 def pegar_json():
-        filename = "assistentes.json"
+        filename = "dados/assistentes.json"
 
         if not os.path.exists(filename):
                 thread_id = criar_thread()
@@ -72,15 +72,20 @@ def criar_thread():
     return cliente.beta.threads.create()
 
 def criar_assistente(file_ids=[]):
-        assistente = cliente.beta.assistants.create(
-                name="Atendente limalimao",
-                instructions = f"""
-                                Você é analista de dados de uma empresa. Especialista em BI. 
-                                Você não deve responder perguntas que não sejam dos dados fornecidos em functions calling
-                                Além disso, a thread para responder as perguntas.
-                                """,
-                model = modelo,
-                tools=minhas_tools,
-                file_ids = file_ids
-        )
-        return assistente
+    assistente = cliente.beta.assistants.create(
+        name="BOT CISSPoder",
+        description="""
+            Você é analista de dados de uma empresa. Especialista em BI, vendas e marketing. 
+            Você não deve responder perguntas que não sejam dos dados fornecidos em functions calling
+            Além disso, a thread para responder as perguntas.
+        """,
+        model=modelo,
+        tools=minhas_tools,
+        tool_resources={
+            "code_interpreter": {
+                "file_ids": file_ids  # Corrigido: passando a lista diretamente
+            }
+        }
+    )
+    return assistente
+

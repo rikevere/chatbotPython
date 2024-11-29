@@ -119,4 +119,3 @@ cliente_18368 = df[df['CLIENTE_ID'] == 18368]
 historico = cliente_18368[['PRODUTO_NOME', 'CATEGORIA']].to_dict(orient='records')
 print(f"""comprou os seguintes produtos: {historico}""")
 print(sugerir_promocao(18368, historico))
-

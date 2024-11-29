@@ -1,165 +1,102 @@
 from dotenv import load_dotenv
-import os
-from retorna_periodo import *
-from conecta_db2 import pega_conexao_db2
+#clearmport os
+#from retorna_periodo import *
+from conecta_db2 import pega_conexao_db2  # Importar a função para obter a conexão
 
 load_dotenv()
 
-def retorna_dados_vendas(dataini, datafim):   
-    con = pega_conexao_db2()
-    try:   
-        cur = con.cursor()
-        cur.execute(f"""SELECT                      
-                    PCABVDA.EMPRESA,  
-                    PCABVDA.DTEMISSAO,  
-                    PCABVDA.HREMISSAO,  
-                    PCABVDA.NROVDA,  
-                    PPESCLI.NOME AS NOME_CLIENTE,                                                              
-                    PREPRESE.DESCRICAO AS NOME_VENDEDOR,
-                    PCABVDA.NROPEDCLI,
-                    RETORNATOTALVDA.VLRTOTAL AS TOTAL      
-                    FROM PCABVDA  
-                    INNER JOIN PPESCLI 
-                        ON PPESCLI.EMPRESA = PCABVDA.ESTABCLIENTE    
-                    AND PPESCLI.CLIENTE = PCABVDA.CLIENTE    
-                    LEFT JOIN PREPRESE      
-                        ON PREPRESE.EMPRESA  = PCABVDA.ESTABREPRESENT    
-                    AND PREPRESE.REPRESENT = PCABVDA.REPRESENT
-                    LEFT JOIN PCUPOM
-                        ON PCUPOM.EMPRESA = PCABVDA.EMPRESA
-                    AND PCUPOM.NROVDA = PCABVDA.NROVDA
-                    LEFT JOIN RETORNATOTALVDA(PCABVDA.EMPRESA, PCABVDA.NROVDA)    
-                        ON 0=0
-                    WHERE   PCABVDA.EMPRESA = 1003
-                        AND PCABVDA.DTEMISSAO BETWEEN '{dataini}' AND '{datafim}'
-                    ORDER BY DTEMISSAO""")
 
-        # Obtendo os nomes das colunas
-        colunas = [desc[0] for desc in cur.description]
-
-        # Obtendo os valores
-        valores = cur.fetchall()
-
-        return colunas, valores
-    
+def retorna_nota_cliente(chave_de_acesso, cpf):   
+    print(cpf)
+    print(chave)
+    try:
+        conn = pega_conexao_db2()
     except Exception as e:
-        print(f"Erro ao executar operações no banco de dados: {e}")
-    finally:
-    # Fecha a conexão com o banco de dados
-        con.close()
+        print(f"Erro ao estabelecer conexão com o banco de dados: {e}")
+        exit()
 
-def retorna_dados_contas_a_pagar(dataini, datafim):
-    con = pega_conexao_db2()
-    try:        
-        cur = con.cursor()
-        cur.execute(f"""SELECT VDUPPAG.DUPPAG, VDUPPAG.DTEMISSAO,
-                    VDUPPAG.DTENTRADA, VDUPPAG.DTPREVREC, 
-                    VDUPPAG.DTVENCTO, VDUPPAG.VALOR,
-                    VDUPPAG.JUROS, VDUPPAG.DESCONTOS,
-                    VDUPPAG.MESCOMPET, VDUPPAG.ANOCOMPET,
-                    PPESSFOR.NOME, VDUPPAG.FORNECEDOR,
-                    VDUPPAG.HISTORICO,
-                    VDUPPAG.PAGO AS TOTPAG, 
-                    VDUPPAG.SALDO, VDUPPAG.MOEDA, 
-                    VDUPPAG.ANALITICA, VDUPPAG.PORTADOR, 
-                    PPORTADO.DESCRICAO AS NOMEPORT, 
-                    VDUPPAG.ESTABFORNECEDOR, 
-                    VDUPPAG.JUROSPEND, VDUPPAG.DESCPEND, 
-                    VDUPPAG.CENCUSCOD, VDUPPAG.CENTROCUS, 
-                    VDUPPAG.SITUACAO, PSITUACA.DESCRICAO AS DESCSITUAC 
-                    FROM VDUPPAG
-                    LEFT JOIN PPESSFOR
-                    ON (VDUPPAG.ESTABFORNECEDOR = PPESSFOR.EMPRESA)
-                    AND (VDUPPAG.FORNECEDOR = PPESSFOR.FORNECEDOR)
-                    LEFT JOIN PPORTADO 
-                    ON (VDUPPAG.EMPRESA = PPORTADO.EMPRESA) 
-                    AND (VDUPPAG.PORTADOR = PPORTADO.PORTADOR) 
-                    LEFT JOIN PSITUACA 
-                    ON (VDUPPAG.SITUACAO = PSITUACA.SITUACAO) 
-                    WHERE (VDUPPAG.EMPRESA = 1003)
-                    AND ( (VDUPPAG.QUITADA <> 'S') OR
-                    (VDUPPAG.QUITADA IS NULL) )
-                    AND (VDUPPAG.AUTORIZADA = 'S') 
-                    AND ( (PSITUACA.LISTBAIXA IS NULL) OR 
-                    (PSITUACA.LISTBAIXA = 'S') )
-                    AND (VDUPPAG.ESTABFORNECEDOR = 1003)
-                    AND VDUPPAG.DTVENCTO BETWEEN '{dataini}' AND '{datafim}'
-                    ORDER BY VDUPPAG.DTVENCTO""")
+    # Consulta SQL para carregar os dados da nota do cliente por CPF ou Chave de Acesso
+    sql = F"""SELECT
+        EA.PERDESCONTO,
+        E.NOMEFANTASIA AS NOME_DA_LOJA,
+        N.NUMNOTA AS NUMERO_DA_NOTA,
+        N.SERIENOTA AS SERIE_DA_NOTA,
+        V.NOME AS NOME_DO_VENDEDOR,
+        CF.FONE1 AS TELEFONE_CLIENTE,
+        CF.NOME AS NOME_CLIENTE,
+        CF.BAIRRO AS BAIRRO_CLIENTE,
+        CF.ENDERECO AS ENDERECO_CLIENTE,
+        CF.CNPJCPF AS CPF_CNPJ_CLIENTE,
+        CF.UFCLIFOR AS ESTADO_DO_CLIENTE,
+        CI.DESCRCIDADE AS CIDADE_CLIENTE,
+        NES.DTMOVIMENTO AS DATA_DA_NOTA,
+        PV.FABRICANTE AS FABRICANTE_PRODUTO,
+        PV.IDSUBPRODUTO AS CODIGO_PRODUTO,
+        PV.DESCRCOMPRODUTO || PV.SUBDESCRICAO AS DESCRICAO_PRODUTO,
+        PV.EMBALAGEMSAIDA AS EMBALAGEM_VENDA,
+        CAST(TRUNC(EA.QTDPRODUTO, 0) AS NUMERIC(10, 0)) AS QUANTIDADE_PRODUTO,
+        CAST(ROUND((EA.VALTOTLIQUIDO / EA.QTDPRODUTO), 2) AS NUMERIC(10, 2)) AS VALOR_UNITARIO_LIQUIDO_PRODUTO,
+        EA.VALTOTBRUTO AS VALOR_TOTAL_BRUTO,
+        EA.VALTOTLIQUIDO AS VALOR_TOTAL_LIQUIDO,
+        NES.VALFRETENOTA AS VALOR_DE_FRETE_NOTA,
+        NES.OBSFISCAL || NES.OBSNOTA AS OBSERVACOES_DA_NOTA,
+        (EA.VALDESCONTOFINANCEIRO + EA.VALDESCONTOPRO) AS DESCONTO_NOTA,
+        (EA.VALACRESCIMOFINANCEIRO + EA.VALACRESCIMOPRO) AS ACRESCIMO_NOTA,
+        OI.DESCROPERACAO AS TIPO_DE_MOVIMENTO_DA,
+        CASE WHEN TRIM(CF.NOMEFANTASIA) = '' THEN 'N O INFORMADO' ELSE CF.NOMEFANTASIA END AS NOME_FANTASIA_CLIENTE
+        FROM
+        NOTAS N
+        JOIN NOTA_FISCAL_ELETRONICA NFE
+            ON N.IDEMPRESA = NFE.IDEMPRESA AND N.IDPLANILHA = NFE.IDPLANILHA
+        JOIN CLIENTE_FORNECEDOR CF
+            ON N.IDCLIFOR = CF.IDCLIFOR
+        JOIN CIDADES_IBGE CI
+            ON CF.IDCIDADE = CI.IDCIDADE
+        JOIN EMPRESA E
+            ON N.IDEMPRESA = E.IDEMPRESA
+        LEFT JOIN ESTOQUE_ANALITICO EA
+            ON N.IDEMPRESA = EA.IDEMPRESA AND N.IDPLANILHA = EA.IDPLANILHA
+        LEFT JOIN CLIENTE_FORNECEDOR V
+            ON EA.IDVENDEDOR = V.IDCLIFOR
+        LEFT JOIN PRODUTOS_VIEW PV
+            ON EA.IDPRODUTO = PV.IDPRODUTO AND EA.IDSUBPRODUTO = PV.IDSUBPRODUTO
+        JOIN NOTAS_ENTRADA_SAIDA NES
+            ON N.IDEMPRESA = NES.IDEMPRESA AND N.IDPLANILHA = NES.IDPLANILHA
+        JOIN OPERACAO_INTERNA OI
+            ON NES.IDOPERACAO = OI.IDOPERACAO AND EA.IDOPERACAO = OI.IDOPERACAO
+        WHERE
+        (NFE.CHAVENFE = '{chave_de_acesso}' OR CF.CNPJCPF = '{cpf}');"""
 
-        # Obtendo os nomes das colunas
-        colunas = [desc[0] for desc in cur.description]
-
-        # Obtendo os valores
-        valores = cur.fetchall()
-
-        return colunas, valores
+    # AND (CF.CNPJCPF = '{cpf}' OR {cpf} IS NULL)
+    # Executar a consulta e carregar os resultados em um DataFrame
+    try:
+        import ibm_db
+        stmt = ibm_db.exec_immediate(conn, sql,)
+        rows = []
+        while True:
+            row = ibm_db.fetch_assoc(stmt)
+            if not row:
+                break
+            rows.append(row)
+        
+        # Fechar a conexão
+        ibm_db.close(conn)  
 
     except Exception as e:
-        print(f"Erro ao executar operações no banco de dados: {e}")
-    finally:
-    # Fecha a conexão com o banco de dados
-        con.close()    
+        print(f"Erro ao executar a consulta SQL: {e}")
+        exit()
 
+    return rows
 
-def retorna_dados_contas_a_receber(dataini, datafim):
-    con = pega_conexao_db2() 
-    try:    
-        cur = con.cursor()
-        cur.execute(f"""SELECT VDUPREC.DUPREC,      VDUPREC.CLIENTE,      VDUPREC.DTEMISSAO, 
-                    VDUPREC.DTVENCTO,    VDUPREC.JUROS,        VDUPREC.DESCONTO, 
-                    VDUPREC.VALOR,       VDUPREC.FATURA,
-                    VDUPREC.HISTORICO,   VDUPREC.SITUACAO,     VDUPREC.PORTADOR AS PORTADOR, 
-                    VDUPREC.VENCTOORIG,  VDUPREC.NOSSONUMERO,  VDUPREC.MESCOMPET, 
-                    VDUPREC.ANOCOMPET,   VDUPREC.VALDUP,       VDUPREC.SALDO, 
-                    PPESCLI.CLIENTE || ' - ' || PPESCLI.NOME AS NOME,  PPESCLI.TELEFONE, 
-                    VDUPREC.RECEBIDO AS TOTREC, VDUPREC.MOEDA, PPORTADO.DESCRICAO AS NOMEPORT, 
-                    VDUPREC.ANADESC,     VDUPREC.ESTABCLIENTE, VDUPREC.JUROSPEND, 
-                    VDUPREC.DESCPEND,    VDUPREC.DTBASEJUROS,  VDUPREC.MULTA, 
-                    VDUPREC.CENCUSCOD,   VDUPREC.CENTROCUS,    PSITUACA. DESCRICAO AS DESCSITUAC, 
-                    PREPRESE.REPRESENT,  PREPRESE.DESCRICAO AS NOMEREPRE, VDUPREC.EMPRESA 
-                    FROM VDUPREC
-                    LEFT JOIN PPESCLI 
-                    ON (VDUPREC.ESTABCLIENTE = PPESCLI.EMPRESA) 
-                    AND (VDUPREC.CLIENTE      = PPESCLI.CLIENTE) 
-                    LEFT JOIN PPORTADO 
-                    ON (VDUPREC.EMPRESA  = PPORTADO.EMPRESA) 
-                    AND (VDUPREC.PORTADOR = PPORTADO.PORTADOR) 
-                    LEFT JOIN PSITUACA 
-                    ON (VDUPREC.SITUACAO = PSITUACA.SITUACAO) 
-                    LEFT JOIN PREPRESE 
-                    ON (VDUPREC.ESTABREPRESENT = PREPRESE.EMPRESA) 
-                    AND (VDUPREC.REPRESENT      = PREPRESE.REPRESENT) 
-                    LEFT JOIN FILIAL 
-                    ON (VDUPREC.EMPRESA = FILIAL.ESTAB) 
-                    WHERE (VDUPREC.EMPRESA  = 1003 )
-                    AND ( (VDUPREC.QUITADA <> 'S') OR
-                    (VDUPREC.QUITADA IS NULL) )
-                    AND ( (PSITUACA.LISTBAIXA IS NULL) OR 
-                    (PSITUACA.LISTBAIXA = 'S') )
-                    AND VDUPREC.DTVENCTO BETWEEN '{dataini}' AND '{datafim}'
-                    ORDER BY VDUPREC.DTVENCTO""")
-
-        # Obtendo os nomes das colunas
-        colunas = [desc[0] for desc in cur.description]
-
-        # Obtendo os valores
-        valores = cur.fetchall()
-
-        return colunas, valores
-    
-    except Exception as e:
-        print(f"Erro ao executar operações no banco de dados: {e}")
-    finally:
-    # Fecha a conexão com o banco de dados
-        con.close()    
-
-#dtini = '04-10-2023'
+chave = 41210624405054000103550040000005521000121002  
+#chave = str(chave)
+cpf = 83629440991
 #dtfim = '04-19-2023'
 
 #dados = retorna_dados_vendas(dtini, dtfim)
 #dados1 = retorna_dados_contas_a_pagar(dtini, dtfim)
 #dados2 = retorna_dados_contas_a_receber(dtini, dtfim)
 
-#print(dados)
+#print(retorna_nota_cliente(chave, cpf))
 #print(dados1)
 #print(dados2)

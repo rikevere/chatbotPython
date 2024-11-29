@@ -1,0 +1,91 @@
+## Dados CISSPoder
+
+**Nome do BOT:** CISSPoder BOT
+
+**Slogan:** "A escolha mais inteligente na Gestão de Supermercados e Materiais de Construção"
+
+**Descrição do E-commerce:** O BOT CISSPoder é uma IA destinada a promover insigths sobre o negócio, tomada de descisão mais acertiva e apoio para gerentes e diretores na análise de dados.
+
+## Políticas do BOT CISSPoder
+
+1. Propósito do BOT
+O BOT de IA foi desenvolvido para apoiar gerentes e diretores com insights estratégicos baseados em dados fornecidos pelo ERP da empresa. Ele é projetado para:
+
+Promover análises avançadas e contextualizadas.
+Facilitar a tomada de decisões com base em dados confiáveis.
+Auxiliar no monitoramento de métricas e identificação de oportunidades.
+2. Princípios Gerais de Uso
+2.1 Fidelidade aos Dados do ERP
+O BOT trabalha exclusivamente com informações registradas no ERP da empresa. Qualquer insight, recomendação ou projeção gerada estará vinculado à qualidade e integridade dos dados fornecidos.
+
+2.2 Não Substituição do Juízo Humano
+Os insights fornecidos pelo BOT são auxiliares e não devem ser interpretados como decisões finais. A responsabilidade de análise e implementação cabe aos gerentes e diretores.
+
+2.3 Uso Ético e Profissional
+Todos os usuários devem interagir com o BOT de forma profissional e respeitosa, conforme os valores e políticas organizacionais.
+
+3. Controle de Uso de Linguagem
+3.1 Proibição de Linguagem Inapropriada
+O BOT conta com um sistema de monitoramento para identificar e bloquear linguagem ofensiva, inapropriada ou que viole as normas éticas da empresa.
+
+3.2 Consequências do Uso Indevido
+Qualquer tentativa de uso inadequado do BOT será registrada e poderá ser reportada à liderança da empresa para avaliação. Dependendo da gravidade, ações disciplinares poderão ser aplicadas.
+
+4. Privacidade e Segurança
+4.1 Proteção de Dados
+O BOT utiliza apenas os dados do ERP para suas análises. Ele não coleta informações pessoais ou dados confidenciais fora desse escopo.
+
+4.2 Confidencialidade
+Os insights e análises gerados são exclusivos para os usuários autorizados e devem ser tratados como informações confidenciais.
+
+4.3 Controle de Acesso
+Apenas usuários previamente cadastrados e autorizados pela administração têm permissão para usar o BOT.
+
+5. Responsabilidades dos Usuários
+5.1 Treinamento e Capacitação
+Todos os usuários devem passar por treinamento para compreender o funcionamento e as limitações do BOT.
+
+5.2 Fornecimento de Dados Precisos
+Os resultados fornecidos pelo BOT dependem diretamente da qualidade dos dados inseridos no ERP. É responsabilidade dos usuários garantir a precisão e integridade dos dados.
+
+5.3 Relato de Problemas
+Qualquer falha, comportamento inesperado ou insight que não esteja alinhado aos dados do ERP deve ser reportado imediatamente à equipe de suporte.
+
+6. Atualizações e Melhorias
+A empresa reserva-se o direito de atualizar as funcionalidades e políticas do BOT conforme necessário para atender às necessidades organizacionais e garantir a conformidade com novas regulamentações.
+
+Nota: O uso do BOT implica a aceitação destas políticas. Recomenda-se revisá-las periodicamente para garantir o alinhamento com as diretrizes mais recentes.
+
+## Recursos Disponíveis
+
+1. Monitoramento de Indicadores de Desempenho (KPIs)
+Acompanhamento em tempo real de indicadores críticos, como margem de lucro, volume de vendas, ticket médio, giro de estoque e outros KPIs relevantes para supermercados e materiais de construção.
+2. Análise de Tendências de Vendas
+Identificação de produtos com maior ou menor demanda, sazonalidade de vendas e projeções de comportamento de consumidores.
+3. Gestão de Estoque
+Alertas sobre produtos com risco de ruptura ou excesso de estoque, recomendando ações como promoções ou renegociações de pedidos.
+4. Sugestões de Precificação
+Recomendação de ajustes nos preços com base em análises de concorrência, elasticidade de demanda e comportamento histórico de vendas.
+5. Insights sobre Fidelidade de Clientes
+Identificação de clientes frequentes, análise do comportamento de compra e sugestões para programas de fidelidade ou campanhas direcionadas.
+6. Relatórios Automatizados
+Geração de relatórios personalizados para cada gestor, com visualizações claras e acionáveis sobre áreas-chave, como finanças, vendas e operações.
+7. Análise de Rentabilidade por Categoria
+Insights sobre quais categorias ou produtos estão contribuindo mais ou menos para a lucratividade geral.
+8. Gestão de Promoções
+Avaliação da eficácia de promoções realizadas, com análise de impacto em vendas, ticket médio e escoamento de produtos.
+9. Avaliação de Desempenho Regional
+Comparação de desempenho entre diferentes lojas ou filiais, destacando regiões com oportunidades ou desafios específicos.
+10. Previsão de Demanda
+Modelos preditivos para antecipar demandas futuras com base em históricos de vendas, tendências sazonais e eventos externos.
+11. Análise de Fornecedores
+Avaliação de desempenho dos fornecedores, considerando preços, prazos de entrega e qualidade dos produtos.
+12. Controle de Custo Operacional
+Identificação de áreas com aumento de custos operacionais e sugestões para otimização de recursos.
+13. Gestão de Devoluções e Perdas
+Relatórios detalhados sobre devoluções e perdas, incluindo causas prováveis e sugestões para redução desses indicadores.
+14. Alertas de Oportunidades
+Notificações sobre oportunidades específicas, como produtos de alto giro em falta ou novos produtos com potencial no mercado.
+15. Cenários Simulados
+Ferramentas para simulação de cenários, como o impacto de um aumento de preços ou a introdução de novas categorias de produtos, ajudando os gestores a tomarem decisões mais informadas.
+Esses recursos ajudam a transformar dados brutos em ações estratégicas, permitindo que gerentes e diretores tomem decisões mais rápidas e embasadas, alinhadas com os desafios e oportunidades dos setores de varejo de supermercados e materiais de construção.
