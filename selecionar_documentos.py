@@ -7,7 +7,8 @@ from helpers import *
 load_dotenv()
 
 cliente = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-modelo = "gpt-4-1106-preview"
+modelo = "gpt-4o-mini"
+#"gpt-4-1106-preview"
 
 politicas_bot = carrega('dados/politicas_bot_cisspoder.txt')
 dados_bot = carrega('dados/dados_bot_cisspoder.txt')

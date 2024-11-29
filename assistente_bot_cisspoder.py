@@ -5,12 +5,13 @@ from time import sleep
 from helpers import *
 from selecionar_persona import *
 import json
-from chatbotPython.tools_bot_cisspoder_old import *
+from chatbotPython.tools_bot_cisspoder import *
 
 load_dotenv()
 
 cliente = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-modelo = "gpt-4-1106-preview"
+modelo = "gpt-4o-mini"
+#"gpt-4-1106-preview"
 contexto = carrega("dados/bot_cisspoder.txt")
 
 def criar_lista_ids():

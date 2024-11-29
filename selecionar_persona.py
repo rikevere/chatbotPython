@@ -5,7 +5,8 @@ import os
 load_dotenv()
 
 cliente = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-modelo = "gpt-4"
+modelo = "gpt-4o-mini"
+#"gpt-4"
 
 personas = {
     'positivo': """

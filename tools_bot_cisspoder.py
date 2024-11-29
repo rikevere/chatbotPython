@@ -10,7 +10,8 @@ import html
 load_dotenv()
 
 cliente = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-modelo = "gpt-4-1106-preview"
+modelo = "gpt-4o-mini"
+#"gpt-4-1106-preview"
 
 # Substitua 'SUA_CHAVE_API' pela sua chave API real do Meteoblue
 API_KEY = os.getenv("METEOBLUE_API_KEY")

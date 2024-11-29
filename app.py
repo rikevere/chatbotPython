@@ -1,4 +1,4 @@
-from flask import Flask,render_template, request, Response
+from flask import Flask, render_template, request
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
@@ -6,52 +6,94 @@ from time import sleep
 from helpers import *
 from selecionar_persona import *
 from assistente_bot_cisspoder import *
-#from vision_limalimao import analisar_imagem
+from conecta_db2 import pega_conexao_db2
 import uuid
-from datetime import datetime
-from conecta_db2 import pega_conexao_db2  # Importar a função para obter a conexão
+import json
 
 load_dotenv()
 
+# Configurações do OpenAI
 cliente = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-modelo = "gpt-3.5-turbo-0125"
-#modelo = "gpt-4-1106-preview"
+modelo = "gpt-4o-mini"
+#"gpt-4-0613"
 
+# Configurações do Flask
 app = Flask(__name__)
-app.secret_key = 'ciss_poder'
+app.secret_key = "ciss_poder"
 
+# Configurações do Assistente
 assistente = pegar_json()
 thread_id = assistente["thread_id"]
 assistente_id = assistente["assistant_id"]
 file_ids = assistente["file_ids"]
 
+# Constantes
 STATUS_COMPLETED = "completed"
 STATUS_REQUIRES_ACTION = "requires_action"
-
+UPLOAD_FOLDER = "dados"
 caminho_imagem_enviada = None
-UPLOAD_FOLDER = 'dados'
+
+
+def finalizar_run_ativo(thread_id):
+    """
+    Finaliza qualquer run ativo na thread especificada.
+    """
+    try:
+        runs = cliente.beta.threads.runs.list(thread_id=thread_id).data
+        for run in runs:
+            if run.status in ["in_progress", "requires_action"]:
+                print(f"Encerrando run ativo: {run.id} com status {run.status}")
+                if run.status == STATUS_REQUIRES_ACTION:
+                    cliente.beta.threads.runs.submit_tool_outputs(
+                        thread_id=thread_id,
+                        run_id=run.id,
+                        tool_outputs=[]  # Submeter vazio caso não haja saídas processadas
+                    )
+        return True
+    except Exception as e:
+        print(f"Erro ao finalizar run ativo: {e}")
+        return False
+
+
+def filtrar_historico(historico, limite_tokens=3000):
+    """
+    Filtra o histórico para manter apenas mensagens relevantes dentro do limite de tokens.
+    """
+    mensagens_filtradas = []
+    tokens_total = 0
+
+    for mensagem in reversed(historico):  # Processa do final para o início
+        tamanho_mensagem = len(mensagem.content[0].text.value.split()) if mensagem.content else 0
+        if tokens_total + tamanho_mensagem > limite_tokens:
+            break
+        mensagens_filtradas.append(mensagem)
+        tokens_total += tamanho_mensagem
+
+    return list(reversed(mensagens_filtradas))
+
 
 def bot(prompt):
-    global caminho_imagem_enviada
+    """
+    Processa o prompt do usuário e retorna a resposta do bot.
+    """
     try:
-        # Finalizar run ativo, se necessário
-        run_id = finalizar_run_ativo(thread_id)
-        if run_id:
-            print(f"Run ativo finalizado ou em progresso: {run_id}")
+        # Finalizar runs ativos
+        if not finalizar_run_ativo(thread_id):
+            return {"content": "Erro ao finalizar run ativo."}
 
-        # Selecionar personalidade
+        # Definir personalidade com base no sentimento do prompt
         personalidade_key = selecionar_persona(prompt)
         personalidade = personas.get(personalidade_key, personas["neutro"])
         print(f"Personalidade escolhida: {personalidade_key}")
 
-        # Enviar mensagem para ajustar personalidade
+        # Enviar personalidade como mensagem inicial
         cliente.beta.threads.messages.create(
             thread_id=thread_id,
             role="user",
             content=f"Assuma a seguinte personalidade:\n{personalidade}"
         )
 
-        # Enviar mensagem com o prompt do usuário
+        # Enviar prompt do usuário
         cliente.beta.threads.messages.create(
             thread_id=thread_id,
             role="user",
@@ -61,134 +103,110 @@ def bot(prompt):
         # Executar o assistente
         run = cliente.beta.threads.runs.create(thread_id=thread_id, assistant_id=assistente_id)
 
-        # Processar a execução
+        # Aguardar conclusão do run
         while run.status != STATUS_COMPLETED:
             run = cliente.beta.threads.runs.retrieve(thread_id=thread_id, run_id=run.id)
             print(f"Status do run: {run.status}")
 
-            # Lidar com o status `requires_action`
+            if run.status == "failed":
+                print(f"Erro no processamento do run: {run}")
+                return {"content": "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde."}
+
             if run.status == STATUS_REQUIRES_ACTION:
+                # Processar ferramentas acionadas
                 tools_acionadas = run.required_action.submit_tool_outputs.tool_calls
                 respostas_tools_acionadas = []
 
-                for uma_tool in tools_acionadas:
-                    nome_funcao = uma_tool.function.name
+                for tool_call in tools_acionadas:
+                    nome_funcao = tool_call.function.name
                     print(f"Função acionada: {nome_funcao}")
 
-                    # Obter a função correspondente
-                    funcao_escolhida = minhas_funcoes.get(nome_funcao)
-                    if funcao_escolhida:
-                        # Obter os argumentos da função
-                        argumentos = json.loads(uma_tool.function.arguments)
-                        print(f"Argumentos recebidos: {argumentos}")
-
-                        # Executar a função e capturar a saída
-                        resposta_funcao = funcao_escolhida(argumentos)
-                        print(f"Resultado da função {nome_funcao}: {resposta_funcao}")
-
-                        # Adicionar a saída para enviar ao assistente
-                        respostas_tools_acionadas.append({
-                            "tool_call_id": uma_tool.id,
-                            "output": resposta_funcao
-                        })
+                    # Encontrar função correspondente
+                    funcao = minhas_funcoes.get(nome_funcao)
+                    if funcao:
+                        argumentos = json.loads(tool_call.function.arguments)
+                        try:
+                            resposta = funcao(argumentos)
+                            respostas_tools_acionadas.append({
+                                "tool_call_id": tool_call.id,
+                                "output": resposta
+                            })
+                        except Exception as e:
+                            print(f"Erro ao executar a função {nome_funcao}: {e}")
+                            respostas_tools_acionadas.append({
+                                "tool_call_id": tool_call.id,
+                                "output": f"Erro ao processar função: {e}"
+                            })
                     else:
-                        print(f"Função {nome_funcao} não encontrada em `minhas_funcoes`.")
+                        print(f"Função {nome_funcao} não encontrada.")
 
-                # Submeter as saídas das ferramentas ao assistente
+                # Submeter as saídas processadas
                 run = cliente.beta.threads.runs.submit_tool_outputs(
                     thread_id=thread_id,
                     run_id=run.id,
                     tool_outputs=respostas_tools_acionadas
                 )
-            
+
             sleep(1)
 
-        # Obter histórico
+        # Obter histórico de mensagens
         historico = list(cliente.beta.threads.messages.list(thread_id=thread_id).data)
         print("Histórico completo:", historico)
 
-        # Processar o histórico e extrair a resposta
+        # Processar o histórico e retornar a primeira mensagem relevante
         if historico:
-            primeira_mensagem = historico[0]  # A primeira mensagem relevante
-            print("Primeira mensagem no histórico:", primeira_mensagem)
-
-            # Verificar se há conteúdo na mensagem
-            if hasattr(primeira_mensagem, "content") and primeira_mensagem.content:
-                # Extrair e concatenar texto dos blocos de conteúdo
+            mensagem = historico[0]  # Pega a mensagem mais recente
+            if hasattr(mensagem, "content") and mensagem.content:
                 texto_resposta = " ".join(
-                    bloco.text.value for bloco in primeira_mensagem.content if hasattr(bloco, "text")
+                    bloco.text.value for bloco in mensagem.content if hasattr(bloco, "text")
                 )
-                print("Texto extraído:", texto_resposta)
                 return {"content": texto_resposta}
 
-        print("Formato inesperado de mensagem:", primeira_mensagem)
         return {"content": "Erro ao processar a resposta do assistente."}
 
-
-    except Exception as erro:
-        print(f"Erro no bot: {erro}")
-        return {"content": f"Erro: {erro}"}
-
-    
-    
-def finalizar_run_ativo(thread_id):
-    try:
-        # Obter o run ativo na thread
-        run = cliente.beta.threads.runs.retrieve(thread_id=thread_id)
-        print(f"Run ativo encontrado: {run.id} com status {run.status}")
-
-        # Verificar se o status é requires_action
-        if run.status == STATUS_REQUIRES_ACTION:
-            print("Finalizando run com ações pendentes...")
-            cliente.beta.threads.runs.submit_tool_outputs(
-                thread_id=thread_id,
-                run_id=run.id,
-                tool_outputs=[]  # Envia uma saída vazia se não houver tool_outputs processados
-            )
-        elif run.status != STATUS_COMPLETED:
-            print("Run ativo ainda em progresso. Aguardando finalização...")
-
-        return run.id
     except Exception as e:
-        print(f"Erro ao finalizar run ativo: {e}")
-        return None
+        print(f"Erro no bot: {e}")
+        return {"content": f"Erro: {e}"}
 
 
-#View que vai disparar essa rota /upload_imagem do javaScript
-@app.route('/upload_imagem', methods=['POST'])
+@app.route("/upload_imagem", methods=["POST"])
 def upload_imagem():
+    """
+    Endpoint para upload de imagem.
+    """
     global caminho_imagem_enviada
-    if 'imagem' in request.files:
-        imagem_enviada = request.files['imagem']
-        
-        nome_arquivo = str(uuid.uuid4()) + os.path.splitext(imagem_enviada.filename)[1]
+    if "imagem" in request.files:
+        imagem = request.files["imagem"]
+        nome_arquivo = f"{uuid.uuid4()}{os.path.splitext(imagem.filename)[1]}"
         caminho_arquivo = os.path.join(UPLOAD_FOLDER, nome_arquivo)
-        imagem_enviada.save(caminho_arquivo)
+        imagem.save(caminho_arquivo)
         caminho_imagem_enviada = caminho_arquivo
+        return "Imagem recebida com sucesso!", 200
 
-        return 'Imagem recebida com sucesso!', 200
-    return 'Nenhum arquivo foi enviado', 400
+    return "Nenhum arquivo foi enviado.", 400
+
 
 @app.route("/chat", methods=["POST"])
 def chat():
+    """
+    Endpoint para interação com o bot.
+    """
     prompt = request.json.get("msg", "")
     resposta = bot(prompt)
 
-    # Valide o retorno de `bot()`
-    print("Resposta do bot:", resposta)
-
+    # Validar o retorno do bot
     if isinstance(resposta, dict) and "content" in resposta:
-        texto_resposta = resposta["content"]
-    else:
-        texto_resposta = "Erro: resposta inesperada do assistente."
-
-    return texto_resposta
-
+        return resposta["content"]
+    return "Erro: resposta inesperada do assistente."
 
 
 @app.route("/")
 def home():
+    """
+    Endpoint da página inicial.
+    """
     return render_template("index.html")
 
+
 if __name__ == "__main__":
-    app.run(debug = True)
+    app.run(debug=True)
