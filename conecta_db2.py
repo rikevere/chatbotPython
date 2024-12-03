@@ -28,3 +28,5 @@ def pega_conexao_db2():
     except Exception as e:
         print("Erro ao conectar ao banco de dados:", repr(e))  # Mostra o erro completo
         raise e  # Levanta a exceção para tratamento posterior
+
+

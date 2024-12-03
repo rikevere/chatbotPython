@@ -43,44 +43,69 @@ minhas_tools = [
                 }
         },
         {
-            "type": "function",
-                        "function": {
-                        "name": "retorna_clientes_sem_recorrencia",
-                        "description": "Busca dados dados de vendas do último ano e retorna clientes que não tiveram recorrência em compras na loja em uma quantidade de meses a partir da emissão do relatório, priorizando clientes de maior relevância financeira.",
+                "type": "function",
+                "function": {
+                        "name": "extrai_caracteristicas_produto",
+                        "description": "Extrai características de produtos a partir de descrições e imagens fornecidas para busca e registro no banco de dados",
                         "parameters": {
-                                "type": "object",
-                                "properties": {
-                                        "periodo": {
-                                                "type": "string",
-                                                "description": "Informa a quantidade de meses com ausência de compra dos clientes",
-                                        },
+                        "type": "object",
+                        "properties": {
+                                "marca": {
+                                "type": "string",
+                                "description": "Marca do produto ou serviço, exemplo: 'Atos Indústria'"
                                 },
-                                "required": ["periodo"],
-                        }
-                }
-        },   
-        {       
-            "type": "function",
-                        "function": {
-                        "name": "clientes_por_produto",
-                        "description": "Retorna quais foram os clientes que adquiriram determinado produto",
-                        "parameters": {
-                                "type": "object",
-                                "properties": {
-                                        "produto_id": {
-                                                "type": "string",
-                                                "description": "Especifica o código do produto."
-                                        },
-                                        "produto_desc": {
-                                                "type": "string",
-                                                "description": "Retorna a descrição do produto a ser analisado.",
-                                        },
+                                "fabricante": {
+                                "type": "string",
+                                "description": "Fabricante do produto, exemplo: 'Atos'"
                                 },
-                                "required": ["produto_id", "produto_desc"],
+                                "sessao": {
+                                "type": "string",
+                                "description": "Sessão ou categoria do produto, exemplo: 'Peças e Acessórios Automotivos'"
+                                },
+                                "grupo": {
+                                "type": "string",
+                                "description": "Grupo específico do produto, exemplo: 'Engates para Reboque'"
+                                },
+                                "subgrupo": {
+                                "type": "string",
+                                "description": "Subgrupo específico do produto, exemplo: 'Protetores e Engates'"
+                                },
+                                "faixa_etaria": {
+                                "type": "string",
+                                "description": "Faixa etária indicada para o produto, caso aplicável, exemplo: 'Não especificado'"
+                                },
+                                "tipo_servico_destino": {
+                                "type": "string",
+                                "description": "Tipo de serviço ou uso destinado, exemplo: 'Automóveis'"
+                                },
+                                "sabor": {
+                                "type": "string",
+                                "description": "Sabor do produto, caso aplicável, exemplo: 'Não aplicável'"
+                                },
+                                "classe_produto": {
+                                "type": "string",
+                                "description": "Classe ou tipo do produto, exemplo: 'Não especificado'"
+                                },
+                                "volume": {
+                                "type": "string",
+                                "description": "Dimensões do produto, exemplo: '97 cm x 59 cm x 19 cm'"
+                                }
+                        },
+                        "required": [
+                                "marca",
+                                "fabricante",
+                                "sessao",
+                                "grupo",
+                                "subgrupo",
+                                "faixa_etaria",
+                                "tipo_servico_destino",
+                                "sabor",
+                                "classe_produto",
+                                "volume"
+                        ]
                         }
                 }
         }
-
 
 ]
 
@@ -118,8 +143,50 @@ def validar_notafiscal(argumentos):
 
                         Nenhum nota foi encontrata para os dados informados."""
 
+
+def consultar_produtos(params):
+        # Parâmetros recebidos da API
+        marca = params.get("marca")
+        fabricante = params.get("fabricante")
+        sessao = params.get("sessao")
+        grupo = params.get("grupo")
+        subgrupo = params.get("subgrupo")
+        faixa_etaria = params.get("faixa_etaria")
+        tipo_servico_destino = params.get("tipo_servico_destino")
+        sabor = params.get("sabor")
+        classe_produto = params.get("classe_produto")
+        volume = params.get("volume")
+        pesquisa = f"{marca} {fabricante} {sessao} {grupo} {subgrupo} {faixa_etaria} {tipo_servico_destino} {sabor} {classe_produto} {volume}"
+        print(f"Variáveis Consulta: {marca} {fabricante} {sessao} {grupo} {subgrupo} {faixa_etaria} {tipo_servico_destino} {sabor} {classe_produto} {volume}")
+        try:
+                dados_relatorio = retorna_produtos(pesquisa)
+        except Exception as erro:
+                "Erro na chamada da função Dados Vendas: %s" % erro
+                print('"Erro na chamada da função Dados Vendas:', erro)
+                sleep(1)        
+        if dados_relatorio:
+                return f"""
+                        
+                        # Formato de Resposta
+
+                        Você é promotor de vendas que recebeu uma imagem de um produto que o cliente comprou. Com base nos produtos similares aos da foto da lista abaixo e nos
+                        dados de quantidade disponível e preço, apresente os 5 (se existentes na lista) que mais possuem proximidade com os da foto encaminhada, ofertando-os ao cliente.
+
+                        Estes são os produtos:
+                        {dados_relatorio}
+                                        
+                        """ 
+        else:
+                print("Não está retornando dados SQL")
+                return f"""
+                        
+                        # Formato de Resposta
+
+                        Nenhum nota foi encontrata para os dados informados."""
+
 # dicionário global que será responsável por garantir que tenhamos todas as funcionalidades que associamos até esse momento
 minhas_funcoes = {
     "validar_notafiscal": validar_notafiscal,
-
+    "extrai_caracteristicas_produto": consultar_produtos,  # Configuração correta para consulta
 }
+

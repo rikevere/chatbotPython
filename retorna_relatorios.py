@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 #clearmport os
 #from retorna_periodo import *
 from conecta_db2 import pega_conexao_db2  # Importar a função para obter a conexão
+import Levenshtein
 
 load_dotenv()
 
@@ -88,15 +89,74 @@ def retorna_nota_cliente(chave_de_acesso, cpf):
 
     return rows
 
+
+def retorna_produtos(descricao_base, limite=5):
+    """
+    Busca produtos no banco de dados com descrições mais próximas da string fornecida.
+    """
+
+    try:
+        conn = pega_conexao_db2()
+    except Exception as e:
+        print(f"Erro ao estabelecer conexão com o banco de dados: {e}")
+        exit()
+
+    sql = """SELECT PG.IDSUBPRODUTO, PG.DESCRRESPRODUTO, ESA.QTDATUALESTOQUE, POLITICA_PRECO_PRODUTO.VALPRECOVAREJO
+            FROM DBA.PRODUTO_GRADE PG
+            JOIN ESTOQUE_SALDO_ATUAL ESA
+                ON ESA.IDSUBPRODUTO = PG.IDSUBPRODUTO
+                AND ESA.IDEMPRESA = 1
+                AND ESA.IDLOCALESTOQUE = 1
+            JOIN POLITICA_PRECO_PRODUTO 
+                ON POLITICA_PRECO_PRODUTO.IDSUBPRODUTO = PG.IDSUBPRODUTO
+                AND POLITICA_PRECO_PRODUTO.IDEMPRESA = 1
+            WHERE ESA.QTDATUALESTOQUE > 0 AND PG.FLAGBLOQUEIAVENDA = 'F';"""
+    
+    try:
+        import ibm_db
+        stmt = ibm_db.exec_immediate(conn, sql,)
+        produtos = []
+        while True:
+            row = ibm_db.fetch_assoc(stmt)
+            if not row:
+                break
+            descricao_produto = row["DESCRRESPRODUTO"]
+            id_produto = row["IDSUBPRODUTO"]
+            saldo_produto = row["QTDATUALESTOQUE"]
+            valor_produto = row["VALPRECOVAREJO"]
+            distancia_hamming = Levenshtein.hamming(descricao_base, descricao_produto)
+            produtos.append((id_produto, descricao_produto, saldo_produto, valor_produto, distancia_hamming))
+
+
+        # Ordenar pelo menor valor de distância
+        produtos_ordenados = sorted(produtos, key=lambda x: x[4])
+
+
+        # Retornar os `limite` primeiros produtos
+        produtos_similares = produtos_ordenados[:limite]
+        
+        lista_produtos_similares = ""
+        for produto in produtos_similares:
+            lista_produtos_similares = lista_produtos_similares + (f"ID: {produto[0]}, Descrição: {produto[1]}, Saldo: {produto[2]}, Valor: {produto[3]}\n")
+
+        # Retornar os `limite` primeiros produtos
+        #return produtos_ordenados[:limite], teste2
+        return lista_produtos_similares
+    
+    except Exception as e:
+        print(f"Erro ao buscar produtos similares: {e}")
+        return []
+
+
+
 chave = 41210624405054000103550040000005521000121002  
 #chave = str(chave)
 cpf = 83629440991
 #dtfim = '04-19-2023'
 
-#dados = retorna_dados_vendas(dtini, dtfim)
-#dados1 = retorna_dados_contas_a_pagar(dtini, dtfim)
-#dados2 = retorna_dados_contas_a_receber(dtini, dtfim)
 
-#print(retorna_nota_cliente(chave, cpf))
-#print(dados1)
-#print(dados2)
+descricao_pesquisa = "PremieR Não se aplica Alimentos para Pets Ração para Cães Ração para Raças Específicas Adultos Nutrição Pet Frango Super Premium 12 kg"
+
+lista = retorna_produtos(descricao_pesquisa)
+
+print(lista)

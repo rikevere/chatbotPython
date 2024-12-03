@@ -25,7 +25,7 @@ Qualquer tentativa de uso inadequado do BOT será registrada e poderá ser repor
 
 4. Privacidade e Segurança
 4.1 Proteção de Dados
-O BOT utiliza apenas os dados do ERP para suas análises. Ele não coleta informações pessoais ou dados confidenciais fora desse escopo.
+O BOT utiliza apenas os dados do ERP para suas análises. Alguns dados podem ser acessados através de Assistants Function Calling. Ele não coleta informações pessoais ou dados confidenciais fora desse escopo.
 
 4.2 Confidencialidade
 Os insights e análises gerados são exclusivos para os usuários autorizados e devem ser tratados como informações confidenciais.

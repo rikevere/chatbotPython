@@ -1,11 +1,13 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
 from time import sleep
+from vision_bot_cisspoder import analisar_imagem
 from helpers import *
 from selecionar_persona import *
 from assistente_bot_cisspoder import *
+from selecionar_documentos import selecionar_contexto
 from conecta_db2 import pega_conexao_db2
 import uuid
 import json
@@ -76,6 +78,10 @@ def bot(prompt):
     """
     Processa o prompt do usuário e retorna a resposta do bot.
     """
+    global caminho_imagem_enviada
+    maximo_tentativas = 1
+    repeticao = 0
+
     try:
         # Finalizar runs ativos
         if not finalizar_run_ativo(thread_id):
@@ -86,6 +92,9 @@ def bot(prompt):
         personalidade = personas.get(personalidade_key, personas["neutro"])
         print(f"Personalidade escolhida: {personalidade_key}")
 
+        # Selecionar contexto
+        contexto = selecionar_contexto(prompt)
+
         # Enviar personalidade como mensagem inicial
         cliente.beta.threads.messages.create(
             thread_id=thread_id,
@@ -93,12 +102,32 @@ def bot(prompt):
             content=f"Assuma a seguinte personalidade:\n{personalidade}"
         )
 
+        resposta_vision = ""
+        if caminho_imagem_enviada != None:
+            resposta_vision = analisar_imagem(caminho_imagem_enviada)
+            resposta_vision+= ". Repasse as variáveis anteriores de características de produto para a função extrai_caracteristicas_produto"
+            os.remove(caminho_imagem_enviada)
+            caminho_imagem_enviada = None
+            print("Concluiu a analise de imagem")
+
+        
+
+        # Enviar mensagem com o contexto do documento
+        #cliente.beta.threads.messages.create(
+        #    thread_id=thread_id,
+        #    role="user",
+        #    content=f"Contexto relevante:\n{contexto}\nPergunta: {prompt}"
+        #)
+
         # Enviar prompt do usuário
         cliente.beta.threads.messages.create(
             thread_id=thread_id,
             role="user",
-            content=prompt
+            #content=prompt
+            content =  resposta_vision+prompt
         )
+
+        print(resposta_vision+prompt)
 
         # Executar o assistente
         run = cliente.beta.threads.runs.create(thread_id=thread_id, assistant_id=assistente_id)
@@ -169,21 +198,32 @@ def bot(prompt):
         return {"content": f"Erro: {e}"}
 
 
-@app.route("/upload_imagem", methods=["POST"])
+@app.route('/upload_imagem', methods=['POST'])
 def upload_imagem():
-    """
-    Endpoint para upload de imagem.
-    """
     global caminho_imagem_enviada
-    if "imagem" in request.files:
-        imagem = request.files["imagem"]
-        nome_arquivo = f"{uuid.uuid4()}{os.path.splitext(imagem.filename)[1]}"
+    if 'imagem' in request.files:
+        imagem_enviada = request.files['imagem']
+        
+        # Salvar a imagem no servidor
+        nome_arquivo = str(uuid.uuid4()) + os.path.splitext(imagem_enviada.filename)[1]
         caminho_arquivo = os.path.join(UPLOAD_FOLDER, nome_arquivo)
-        imagem.save(caminho_arquivo)
-        caminho_imagem_enviada = caminho_arquivo
-        return "Imagem recebida com sucesso!", 200
+        imagem_enviada.save(caminho_arquivo)
 
+        # Analisar a imagem
+        resposta_analise = analisar_imagem(caminho_arquivo)
+        caminho_imagem_enviada = caminho_arquivo
+
+
+        # Validar o retorno do bot
+        #return resposta_analise
+        return 'Imagem recebida com sucesso!', 200
+
+        # Retornar a análise ao usuário
+        #return {"content": resposta_analise}, 200
+
+    #return {"content": "Nenhum arquivo foi enviado."}, 400
     return "Nenhum arquivo foi enviado.", 400
+
 
 
 @app.route("/chat", methods=["POST"])
