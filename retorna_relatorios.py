@@ -105,11 +105,11 @@ def retorna_produtos(descricao_base, limite=5):
             FROM DBA.PRODUTO_GRADE PG
             JOIN ESTOQUE_SALDO_ATUAL ESA
                 ON ESA.IDSUBPRODUTO = PG.IDSUBPRODUTO
-                AND ESA.IDEMPRESA = 1
+                AND ESA.IDEMPRESA = 201
                 AND ESA.IDLOCALESTOQUE = 1
             JOIN POLITICA_PRECO_PRODUTO 
                 ON POLITICA_PRECO_PRODUTO.IDSUBPRODUTO = PG.IDSUBPRODUTO
-                AND POLITICA_PRECO_PRODUTO.IDEMPRESA = 1
+                AND POLITICA_PRECO_PRODUTO.IDEMPRESA = 201
             WHERE ESA.QTDATUALESTOQUE > 0 AND PG.FLAGBLOQUEIAVENDA = 'F';"""
     
     try:
@@ -155,7 +155,7 @@ cpf = 83629440991
 #dtfim = '04-19-2023'
 
 
-descricao_pesquisa = "PremieR Não se aplica Alimentos para Pets Ração para Cães Ração para Raças Específicas Adultos Nutrição Pet Frango Super Premium 12 kg"
+descricao_pesquisa = "Nestlé Nestlé Doces e chocolates Chocolates Chocolate ao leite Todas as idades Lanches e sobremesas Chocolate Confeitaria Não especificado"
 
 lista = retorna_produtos(descricao_pesquisa)
 

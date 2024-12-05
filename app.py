@@ -56,6 +56,22 @@ def finalizar_run_ativo(thread_id):
         print(f"Erro ao finalizar run ativo: {e}")
         return False
 
+def formatar_resposta_em_html(resposta):
+    """
+    Transforma o texto da resposta em um HTML mais organizado e legível.
+    """
+    resposta = resposta.replace("\n", "<br>")  # Substitui quebras de linha por tags <br>
+    
+    # Substitui marcadores Markdown por tags HTML
+    resposta = resposta.replace("### ", "<h3>").replace("**", "<b>")
+    resposta = resposta.replace("- ", "<li>").replace("</li>", "</li></ul>")  # Fecha listas
+    resposta = resposta.replace("1.", "<ol><li>").replace("2.", "<li>").replace("3.", "<li>")  # Numerar listas
+    resposta = resposta.replace("</li>", "</li></ol>")  # Fecha listas ordenadas
+
+    # Adiciona div para visualização estilizada
+    resposta_html = f"<div style='font-family: Arial, sans-serif; line-height: 1.5; margin: 1rem; color: #333;'>{resposta}</div>"
+    return resposta_html
+
 
 def filtrar_historico(historico, limite_tokens=3000):
     """
@@ -79,8 +95,6 @@ def bot(prompt):
     Processa o prompt do usuário e retorna a resposta do bot.
     """
     global caminho_imagem_enviada
-    maximo_tentativas = 1
-    repeticao = 0
 
     try:
         # Finalizar runs ativos
@@ -210,7 +224,8 @@ def upload_imagem():
         imagem_enviada.save(caminho_arquivo)
 
         # Analisar a imagem
-        resposta_analise = analisar_imagem(caminho_arquivo)
+        #resposta_analise = analisar_imagem(caminho_arquivo) 
+        # Removido para que seja executado dentro do BOT, complementando o contexto da resposta
         caminho_imagem_enviada = caminho_arquivo
 
 
@@ -224,8 +239,6 @@ def upload_imagem():
     #return {"content": "Nenhum arquivo foi enviado."}, 400
     return "Nenhum arquivo foi enviado.", 400
 
-
-
 @app.route("/chat", methods=["POST"])
 def chat():
     """
@@ -236,8 +249,14 @@ def chat():
 
     # Validar o retorno do bot
     if isinstance(resposta, dict) and "content" in resposta:
-        return resposta["content"]
-    return "Erro: resposta inesperada do assistente."
+        texto_resposta = resposta["content"]
+
+        # Formata a resposta em HTML
+        texto_resposta_formatado = formatar_resposta_em_html(texto_resposta)
+    else:
+        texto_resposta_formatado = "Erro: resposta inesperada do assistente."
+
+    return texto_resposta_formatado
 
 
 @app.route("/")

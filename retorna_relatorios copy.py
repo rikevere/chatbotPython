@@ -22,7 +22,7 @@ def buscar_produtos_similares(descricao_base, limite=5):
                 FROM DBA.PRODUTO_GRADE PG
                 JOIN ESTOQUE_SALDO_ATUAL ESA
                     ON ESA.IDSUBPRODUTO = PG.IDSUBPRODUTO
-                AND ESA.IDEMPRESA = 1
+                AND ESA.IDEMPRESA = 201
                 AND ESA.IDLOCALESTOQUE = 1
                 WHERE ESA.QTDATUALESTOQUE > 0 AND PG.FLAGBLOQUEIAVENDA = 'F';"""
     
@@ -57,7 +57,7 @@ def buscar_produtos_similares(descricao_base, limite=5):
         return []
 
 
-descricao_pesquisa = "PremieR Não se aplica Alimentos para Pets Ração para Cães Ração para Raças Específicas Adultos Nutrição Pet Frango Super Premium 12 kg"
+descricao_pesquisa = "Nestlé Nestlé Doces e chocolates Chocolates Chocolate ao leite Todas as idades Lanches e sobremesas Chocolate Confeitaria Não especificado"
 
 produtos_similares_DIST, produtos_similares_SIMI = buscar_produtos_similares(descricao_pesquisa, limite=5)
 
